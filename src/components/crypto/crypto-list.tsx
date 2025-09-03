@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { CryptoCard } from './crypto-card'
 import { CryptoCurrency } from '@/types/crypto'
 import { Button } from '@/components/ui/button'
@@ -16,11 +16,7 @@ export function CryptoList({ initialLimit = 10 }: CryptoListProps) {
   const [limit, setLimit] = useState(initialLimit)
   const [loadingMore, setLoadingMore] = useState(false)
 
-  useEffect(() => {
-    fetchCryptocurrencies(limit)
-  }, [limit])
-
-  async function fetchCryptocurrencies(currentLimit: number) {
+  const fetchCryptocurrencies = useCallback(async (currentLimit: number) => {
     try {
       if (currentLimit > cryptocurrencies.length) {
         setLoadingMore(true)
@@ -37,13 +33,18 @@ export function CryptoList({ initialLimit = 10 }: CryptoListProps) {
       } else {
         setError(result.error || 'Failed to fetch cryptocurrencies')
       }
-    } catch (err) {
+    } catch {
       setError('Network error occurred')
     } finally {
       setLoading(false)
       setLoadingMore(false)
     }
-  }
+  }, [cryptocurrencies.length])
+
+  useEffect(() => {
+    fetchCryptocurrencies(limit)
+  }, [limit, fetchCryptocurrencies])
+
 
   const handleLoadMore = () => {
     setLimit(prev => prev + 10)

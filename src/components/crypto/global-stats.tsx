@@ -21,7 +21,7 @@ export function GlobalStats() {
         } else {
           setError(result.error || 'Failed to fetch global metrics')
         }
-      } catch (err) {
+      } catch {
         setError('Network error occurred')
       } finally {
         setLoading(false)

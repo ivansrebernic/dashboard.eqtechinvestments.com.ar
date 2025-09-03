@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "mcp__zen__planner",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(npm run lint)"
     ],
     "deny": [],
     "ask": []
