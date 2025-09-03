@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { useUserRole } from '@/lib/roles/hooks'
 import { RoleBadge } from '@/components/roles/role-badge'
-import { Users, Settings, Shield, BarChart3 } from 'lucide-react'
+import { Users, Settings, Shield, BarChart3, Briefcase } from 'lucide-react'
 import Link from 'next/link'
 
 export default function AdminPage() {
@@ -82,7 +82,7 @@ export default function AdminPage() {
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -101,6 +101,28 @@ export default function AdminPage() {
                   </Button>
                   <p className="text-sm text-muted-foreground">
                     View all users, assign roles, and manage permissions
+                  </p>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Briefcase className="h-5 w-5" />
+                    Portfolio Management
+                  </CardTitle>
+                  <CardDescription>
+                    Create and manage cryptocurrency portfolios
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Button asChild variant="outline" className="w-full">
+                    <Link href="/admin/portfolios">
+                      Manage Portfolios
+                    </Link>
+                  </Button>
+                  <p className="text-sm text-muted-foreground">
+                    Track crypto holdings and monitor portfolio performance
                   </p>
                 </CardContent>
               </Card>

@@ -15,7 +15,8 @@ import {
   Shield, 
   Menu, 
   X,
-  LogOut
+  LogOut,
+  Briefcase
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -50,6 +51,12 @@ const navItems: NavItem[] = [
     label: 'User Management',
     icon: Users,
     permission: 'canManageUsers'
+  },
+  {
+    href: '/admin/portfolios',
+    label: 'Portfolio Management',
+    icon: Briefcase,
+    permission: 'canAccessAdmin'
   },
   {
     href: '/settings',
