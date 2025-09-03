@@ -137,20 +137,33 @@ export function useAdminFunctions() {
   }, [])
 
   const getAllUsers = useCallback(async (): Promise<UserWithRole[]> => {
+    console.log('🔍 [Hook] getAllUsers - Starting API call')
     try {
       setLoading(true)
       setError(null)
       
+      console.log('📡 [Hook] Making request to /api/admin/users')
       const response = await fetch('/api/admin/users')
       const result = await response.json()
 
+      console.log('📡 [Hook] API response:', { 
+        ok: response.ok, 
+        status: response.status, 
+        hasUsers: !!result.users, 
+        userCount: result.users?.length || 0,
+        error: result.error 
+      })
+
       if (!response.ok) {
+        console.log('❌ [Hook] API request failed:', { status: response.status, error: result.error })
         throw new Error(result.error || 'Failed to fetch users')
       }
 
+      console.log('✅ [Hook] Users fetched successfully:', { userCount: result.users?.length || 0 })
       return result.users || []
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch users'
+      console.error('❌ [Hook] Error in getAllUsers:', errorMessage)
       setError(errorMessage)
       throw new Error(errorMessage)
     } finally {

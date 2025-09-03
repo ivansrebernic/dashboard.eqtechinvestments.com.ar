@@ -1,12 +1,25 @@
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createClientClient } from '@/lib/supabase/client'
 import type { UserRole, UserRoleData, RoleAssignment, UserWithRole } from '@/types/auth'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 export class RoleService {
-  private supabase
+  private supabase: SupabaseClient | null
+  private isServer: boolean
 
   constructor(isServer = false) {
-    this.supabase = isServer ? createClient() : createClientClient()
+    this.isServer = isServer
+    this.supabase = isServer ? null : createClientClient()
+  }
+
+  private async getSupabaseClient(): Promise<SupabaseClient> {
+    if (this.isServer) {
+      if (!this.supabase) {
+        this.supabase = await createClient()
+      }
+      return this.supabase
+    }
+    return this.supabase!
   }
 
   /**
@@ -14,15 +27,12 @@ export class RoleService {
    */
   async getUserRole(userId: string): Promise<UserRole | null> {
     try {
-      const { data, error } = await this.supabase.rpc('get_user_role', {
+      const supabase = await this.getSupabaseClient()
+      const { data, error } = await supabase.rpc('get_user_role', {
         user_uuid: userId
       });
 
-      if (error) {
-        console.error('Error fetching user role:', error)
-        return null
-      }
-
+      if (error) throw new Error(`Failed to get user role: ${error.message}`)
       return data as UserRole || 'basic'
     } catch (error) {
       console.error('Error in getUserRole:', error)
@@ -31,47 +41,31 @@ export class RoleService {
   }
 
   /**
-   * Get current user's role
-   */
-  async getCurrentUserRole(): Promise<UserRole | null> {
-    try {
-      const { data: { user } } = await this.supabase.auth.getUser()
-      
-      if (!user) {
-        return null
-      }
-
-      return this.getUserRole(user.id)
-    } catch (error) {
-      console.error('Error getting current user role:', error)
-      return null
-    }
-  }
-
-  /**
-   * Check if user has specific role
-   */
-  async userHasRole(userId: string, requiredRole: UserRole): Promise<boolean> {
-    const userRole = await this.getUserRole(userId)
-    return userRole === requiredRole
-  }
-
-  /**
-   * Check if current user has specific role
-   */
-  async currentUserHasRole(requiredRole: UserRole): Promise<boolean> {
-    const userRole = await this.getCurrentUserRole()
-    return userRole === requiredRole
-  }
-
-  /**
-   * Check if user is admin
+   * Check if user is admin using PostgreSQL function
    */
   async isAdmin(userId?: string): Promise<boolean> {
-    if (userId) {
-      return this.userHasRole(userId, 'admin')
+    try {
+      const supabase = await this.getSupabaseClient()
+      const { data, error } = await supabase.rpc('is_admin', 
+        userId ? { user_uuid: userId } : {}
+      )
+      
+      if (error) throw new Error(`Failed to check admin status: ${error.message}`)
+      return data || false
+    } catch (error) {
+      console.error('Error checking admin status:', error)
+      return false
     }
-    return this.currentUserHasRole('admin')
+  }
+
+  /**
+   * Require current user to be admin, throws error if not
+   */
+  private async requireAdmin(): Promise<void> {
+    const isCurrentUserAdmin = await this.isAdmin()
+    if (!isCurrentUserAdmin) {
+      throw new Error('Insufficient permissions')
+    }
   }
 
   /**
@@ -79,29 +73,20 @@ export class RoleService {
    */
   async assignRole(assignment: RoleAssignment): Promise<{ success: boolean; error?: string }> {
     try {
-      // Check if current user is admin
-      const isCurrentUserAdmin = await this.isAdmin()
-      if (!isCurrentUserAdmin) {
-        return { success: false, error: 'Insufficient permissions' }
-      }
+      await this.requireAdmin()
+      const supabase = await this.getSupabaseClient()
 
-      const { data: currentUser } = await this.supabase.auth.getUser()
-      
-      const { error } = await this.supabase
+      const { error } = await supabase
         .from('user_roles')
         .upsert({
           user_id: assignment.userId,
           role: assignment.role,
-          created_by: currentUser?.user?.id,
           updated_at: new Date().toISOString()
         }, {
           onConflict: 'user_id'
         })
 
-      if (error) {
-        return { success: false, error: error.message }
-      }
-
+      if (error) throw new Error(error.message)
       return { success: true }
     } catch (error) {
       return { 
@@ -116,53 +101,13 @@ export class RoleService {
    */
   async getAllUsersWithRoles(): Promise<UserWithRole[]> {
     try {
-      const isCurrentUserAdmin = await this.isAdmin()
-      if (!isCurrentUserAdmin) {
-        throw new Error('Insufficient permissions')
-      }
-
-      // Get all users from auth.users with their roles
-      const { data, error } = await this.supabase
-        .from('user_roles')
-        .select(`
-          *,
-          user:user_id (
-            id,
-            email,
-            user_metadata
-          )
-        `)
-
-      if (error) {
-        throw new Error(error.message)
-      }
-
-      return data?.map((item: {
-        id: string
-        user_id: string
-        role: UserRole
-        created_at: string
-        updated_at: string
-        created_by?: string
-        user?: {
-          id: string
-          email: string
-          user_metadata?: Record<string, unknown>
-        }
-      }) => ({
-        id: item.user?.id || '',
-        email: item.user?.email || '',
-        user_metadata: item.user?.user_metadata,
-        role: item.role,
-        roleData: {
-          id: item.id,
-          user_id: item.user_id,
-          role: item.role,
-          created_at: item.created_at,
-          updated_at: item.updated_at,
-          created_by: item.created_by
-        }
-      })) || []
+      await this.requireAdmin()
+      const supabase = await this.getSupabaseClient()
+      
+      const { data, error } = await supabase.rpc('get_all_users_with_roles')
+      if (error) throw new Error(`Failed to fetch users with roles: ${error.message}`)
+      
+      return data || []
     } catch (error) {
       console.error('Error fetching users with roles:', error)
       return []
@@ -174,20 +119,15 @@ export class RoleService {
    */
   async removeRole(userId: string): Promise<{ success: boolean; error?: string }> {
     try {
-      const isCurrentUserAdmin = await this.isAdmin()
-      if (!isCurrentUserAdmin) {
-        return { success: false, error: 'Insufficient permissions' }
-      }
-
-      const { error } = await this.supabase
+      await this.requireAdmin()
+      const supabase = await this.getSupabaseClient()
+      
+      const { error } = await supabase
         .from('user_roles')
         .delete()
         .eq('user_id', userId)
 
-      if (error) {
-        return { success: false, error: error.message }
-      }
-
+      if (error) throw new Error(error.message)
       return { success: true }
     } catch (error) {
       return { 
@@ -202,16 +142,14 @@ export class RoleService {
    */
   async getUserRoleData(userId: string): Promise<UserRoleData | null> {
     try {
-      const { data, error } = await this.supabase
+      const supabase = await this.getSupabaseClient()
+      const { data, error } = await supabase
         .from('user_roles')
         .select('*')
         .eq('user_id', userId)
         .single()
 
-      if (error) {
-        return null
-      }
-
+      if (error) throw new Error(`Failed to get user role data: ${error.message}`)
       return data
     } catch (error) {
       console.error('Error fetching user role data:', error)

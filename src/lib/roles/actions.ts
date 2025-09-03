@@ -14,7 +14,7 @@ export async function assignUserRole(
   role: UserRole
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
@@ -59,7 +59,7 @@ export async function removeUserRole(
   userId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
@@ -101,7 +101,7 @@ export async function removeUserRole(
  */
 export async function getCurrentUserRole(): Promise<UserRole | null> {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user }, error } = await supabase.auth.getUser();
 
     if (error || !user) {
@@ -121,7 +121,7 @@ export async function getCurrentUserRole(): Promise<UserRole | null> {
  */
 export async function checkUserRole(requiredRole: UserRole): Promise<boolean> {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user }, error } = await supabase.auth.getUser();
 
     if (error || !user) {
@@ -141,7 +141,7 @@ export async function checkUserRole(requiredRole: UserRole): Promise<boolean> {
  */
 export async function checkIsAdmin(): Promise<boolean> {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user }, error } = await supabase.auth.getUser();
 
     if (error || !user) {
@@ -175,7 +175,7 @@ export async function redirectIfUnauthorized(
  */
 export async function getAllUsersWithRoles() {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {

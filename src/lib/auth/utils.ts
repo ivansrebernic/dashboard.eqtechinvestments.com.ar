@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { User } from '@/types/auth'
 
 export async function getUser(): Promise<User | null> {
-  const supabase = createClient()
+  const supabase = await createClient()
   
   try {
     const { data: { user }, error } = await supabase.auth.getUser()
@@ -22,7 +22,7 @@ export async function getUser(): Promise<User | null> {
 }
 
 export async function getSession() {
-  const supabase = createClient()
+  const supabase = await createClient()
   
   try {
     const { data: { session }, error } = await supabase.auth.getSession()

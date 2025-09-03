@@ -152,9 +152,13 @@ export function UserManagementTable({ users, loading, onRoleChange }: UserManage
                   <TableCell>
                     <div className="space-y-1">
                       <div>{user.email}</div>
-                      {user.roleData?.created_at && (
+                      {user.roleData?.created_at ? (
                         <div className="text-xs text-muted-foreground">
                           Role set: {new Date(user.roleData.created_at).toLocaleDateString()}
+                        </div>
+                      ) : (
+                        <div className="text-xs text-muted-foreground italic">
+                          Default role (not explicitly set)
                         </div>
                       )}
                     </div>

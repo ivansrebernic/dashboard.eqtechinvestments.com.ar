@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation'
 import { LoginCredentials } from '@/types/auth'
 
 export async function login(credentials: LoginCredentials) {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     const { error } = await supabase.auth.signInWithPassword({
@@ -31,7 +31,7 @@ export async function login(credentials: LoginCredentials) {
 }
 
 export async function logout() {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     await supabase.auth.signOut()
