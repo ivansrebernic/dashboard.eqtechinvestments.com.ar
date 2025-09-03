@@ -22,6 +22,7 @@ This is a Next.js 15.3.4 application bootstrapped with create-next-app, using th
 - **UI Components**: shadcn/ui with "new-york" style and neutral base color
 - **Icons**: Lucide React
 - **Backend/Auth**: Supabase with authentication and SSR support
+- **API Integration**: CoinMarketCap API for cryptocurrency market data
 - **Fonts**: Geist Sans and Geist Mono (from Google Fonts)
 - **Runtime**: React 19
 
@@ -34,6 +35,13 @@ This is a Next.js 15.3.4 application bootstrapped with create-next-app, using th
   - `utils.ts` - shadcn/ui utility function (cn) for merging classes
 - `src/components/` - React components (shadcn/ui components will be installed here)
   - `ui/` - shadcn/ui components directory
+  - `crypto/` - Cryptocurrency display components
+  - `auth/` - Authentication components
+- `src/types/` - TypeScript type definitions
+  - `auth.ts` - Authentication-related types
+  - `crypto.ts` - CoinMarketCap API response types
+- `src/app/api/` - Next.js API routes
+  - `crypto/` - CoinMarketCap API endpoints
 - `public/` - Static assets (Next.js logo, Vercel logo, icons)
 - Configuration files at root level
 
@@ -56,6 +64,15 @@ This is a Next.js 15.3.4 application bootstrapped with create-next-app, using th
 - **SSR**: @supabase/ssr for server-side rendering support with Next.js App Router
 - **Environment Variables**: Requires `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
+### CoinMarketCap API Integration
+- **Client**: Custom API client in `src/lib/coinmarketcap/client.ts`
+- **Services**: Data fetching and caching services in `src/lib/coinmarketcap/services.ts`
+- **Environment Variables**: Requires `COINMARKETCAP_API_KEY`
+- **API Routes**: `/api/crypto/*` endpoints for frontend consumption
+- **Components**: Pre-built crypto display components with real-time data
+- **Caching**: In-memory caching to optimize API usage and stay within rate limits
+- **Rate Limiting**: Built-in protection against excessive API calls
+
 ### Development Notes
 - Uses Geist font family with CSS variables for consistent typography
 - Configured for both light and dark mode styling with OKLCH color space
@@ -64,3 +81,6 @@ This is a Next.js 15.3.4 application bootstrapped with create-next-app, using th
 - Use `npx shadcn@latest add [component-name]` to install UI components
 - The `cn()` utility function combines clsx and tailwind-merge for conditional classes
 - Supabase client should be configured for both client and server-side usage with App Router
+- CoinMarketCap API key must be set in environment variables for crypto features to work
+- Use the crypto service (`cryptoService`) for all cryptocurrency data operations
+- Crypto components automatically handle loading states, errors, and caching
