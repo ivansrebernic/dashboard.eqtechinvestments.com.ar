@@ -3,10 +3,10 @@ import { serverCryptoService } from '@/lib/coinmarketcap/server-services'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { symbol: string } }
+  { params }: { params: Promise<{ symbol: string }> }
 ) {
+  const { symbol } = await params
   try {
-    const { symbol } = params
 
     if (!symbol || symbol.trim().length < 1) {
       return NextResponse.json(
@@ -29,7 +29,7 @@ export async function GET(
       data: cryptocurrency
     })
   } catch (error) {
-    console.error(`Error in /api/crypto/${params.symbol}:`, error)
+    console.error(`Error in /api/crypto/${symbol}:`, error)
     
     return NextResponse.json(
       { 
