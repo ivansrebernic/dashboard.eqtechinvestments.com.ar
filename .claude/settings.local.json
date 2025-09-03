@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__zen__planner",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
