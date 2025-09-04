@@ -9,6 +9,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { TrendingUp, TrendingDown, Wallet, DollarSign, Activity, BarChart3, ChevronDown, Coins, Clock, Zap } from 'lucide-react'
 import { format, subDays } from 'date-fns'
 import { FearGreedIndex } from './fear-greed-index'
+import { GlobalMarketCapChart } from './global-marketcap-chart'
 
 interface PortfolioWithPerformance extends Portfolio {
   performance: PortfolioPerformance
@@ -322,9 +323,12 @@ export function PortfolioDashboard() {
           )}
         </div>
 
-        {/* Fear & Greed Index */}
-        <div className="mb-12">
+        {/* Market Analytics */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
           <FearGreedIndex />
+          <div className="lg:col-span-2">
+            <GlobalMarketCapChart />
+          </div>
         </div>
 
         {/* Portfolio Analytics */}

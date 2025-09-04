@@ -120,6 +120,32 @@ export class CoinMarketCapClient {
   }
 
   /**
+   * Get historical global cryptocurrency market metrics
+   */
+  async getGlobalMetricsHistorical(params: {
+    time_start?: string
+    time_end?: string
+    count?: number
+    interval?: '1d' | '7d' | '14d' | '15d' | '30d' | '60d' | '90d' | '365d'
+    convert?: string
+  }): Promise<unknown> {
+    const queryParams: Record<string, string> = {
+      convert: 'USD',
+      interval: '30d',
+      count: '12' // 12 months
+    }
+
+    // Override with provided params
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined) {
+        queryParams[key] = value.toString()
+      }
+    })
+
+    return this.makeRequest<unknown>('/global-metrics/quotes/historical', queryParams)
+  }
+
+  /**
    * Convert cryptocurrency amounts
    */
   async convertPrice(params: {

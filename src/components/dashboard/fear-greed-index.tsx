@@ -23,7 +23,7 @@ export function FearGreedIndex() {
     }
 
     fetchData()
-    const interval = setInterval(fetchData, 30 * 60 * 1000) // 30 minutes
+    const interval = setInterval(fetchData, 60 * 60 * 1000) // 1 hour
     return () => clearInterval(interval)
   }, [])
 
@@ -62,49 +62,54 @@ export function FearGreedIndex() {
   const color = getColor()
 
   return (
-    <div className="w-fit">
-      <Card className="bg-gradient-to-br from-eqtech-surface/80 to-eqtech-surface-elevated/60 backdrop-blur-sm border-eqtech-gold/20 shadow-lg">
-        <div className="p-6 flex flex-col items-center space-y-4">
-          <div className="text-sm font-medium text-eqtech-gray-light font-roboto-flex">
+    <Card className="bg-gradient-to-br from-eqtech-surface/80 to-eqtech-surface-elevated/60 backdrop-blur-sm border-eqtech-gold/20 shadow-lg h-full">
+      <div className="p-6 h-full flex flex-col justify-center">
+        <div className="text-center">
+          <div className="text-sm font-medium text-eqtech-gray-light font-roboto-flex mb-6">
             Fear & Greed Index
           </div>
           
-          {/* Simple circular progress */}
-          <div className="relative w-20 h-20">
-            <svg className="w-20 h-20 transform -rotate-90">
-              <circle
-                cx="40"
-                cy="40"
-                r="32"
-                stroke="currentColor"
-                strokeWidth="6"
-                fill="none"
-                className="text-eqtech-gray-medium/20"
-              />
-              <circle
-                cx="40"
-                cy="40"
-                r="32"
-                stroke={color}
-                strokeWidth="6"
-                fill="none"
-                strokeDasharray={`${(value / 100) * 201} 201`}
-                strokeLinecap="round"
-                className="transition-all duration-1000"
-              />
-            </svg>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-eqtech-light">{value}</div>
+          {/* Larger circular progress */}
+          <div className="flex justify-center mb-6">
+            <div className="relative w-32 h-32">
+              <svg className="w-32 h-32 transform -rotate-90">
+                <circle
+                  cx="64"
+                  cy="64"
+                  r="56"
+                  stroke="currentColor"
+                  strokeWidth="10"
+                  fill="none"
+                  className="text-eqtech-gray-medium/20"
+                />
+                <circle
+                  cx="64"
+                  cy="64"
+                  r="56"
+                  stroke={color}
+                  strokeWidth="10"
+                  fill="none"
+                  strokeDasharray={`${(value / 100) * 351.86} 351.86`}
+                  strokeLinecap="round"
+                  className="transition-all duration-1000"
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-eqtech-light mb-1">{value}</div>
+                  <div className="text-sm font-medium" style={{ color }}>
+                    {getLabel()}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
           
-          <div className="text-xs font-medium text-center" style={{ color }}>
-            {getLabel()}
+          <div className="text-xs text-eqtech-gray-light font-roboto-flex">
+            Last 24 hours
           </div>
         </div>
-      </Card>
-    </div>
+      </div>
+    </Card>
   )
 }
