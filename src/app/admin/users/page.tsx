@@ -76,10 +76,9 @@ export default function UsersPage() {
               <div className="flex gap-2">
                 <Button
                   onClick={loadUsers}
-                  variant="outline"
                   size="sm"
                   disabled={isLoading}
-                  className="border-eqtech-gray-medium text-eqtech-light hover:bg-eqtech-gray-medium font-montserrat"
+                  className="bg-eqtech-gray-dark border border-eqtech-gray-medium text-eqtech-light hover:bg-eqtech-gray-medium font-montserrat"
                 >
                   <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
                   Refresh

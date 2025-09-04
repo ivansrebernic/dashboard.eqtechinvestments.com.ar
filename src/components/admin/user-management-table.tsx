@@ -212,10 +212,9 @@ export function UserManagementTable({ users, loading, onRoleChange }: UserManage
                           
                           <Button
                             size="sm"
-                            variant="outline"
                             onClick={() => handleCancelEdit(user.id)}
                             disabled={assignLoading}
-                            className="border-eqtech-gray-medium text-eqtech-light hover:bg-eqtech-gray-medium font-montserrat"
+                            className="bg-eqtech-gray-dark border border-eqtech-gray-medium text-eqtech-light hover:bg-eqtech-gray-medium font-montserrat"
                           >
                             Cancel
                           </Button>
@@ -223,10 +222,9 @@ export function UserManagementTable({ users, loading, onRoleChange }: UserManage
                       ) : (
                         <Button
                           size="sm"
-                          variant="outline"
                           onClick={() => setEditingUser(user.id)}
                           disabled={assignLoading}
-                          className="border-eqtech-gray-medium text-eqtech-light hover:bg-eqtech-gray-medium font-montserrat"
+                          className="bg-eqtech-gray-dark border border-eqtech-gray-medium text-eqtech-light hover:bg-eqtech-gray-medium font-montserrat"
                         >
                           Edit Role
                         </Button>

@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { useUserRole } from '@/lib/roles/hooks'
 import { RoleBadge } from '@/components/roles/role-badge'
-import { Users, Settings, Shield, BarChart3, Briefcase } from 'lucide-react'
+import { Users, BarChart3, Briefcase, Shield } from 'lucide-react'
 import Link from 'next/link'
 
 export default function AdminPage() {
@@ -82,7 +82,7 @@ export default function AdminPage() {
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Card className="bg-eqtech-gray-dark border-eqtech-gray-medium">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-eqtech-light font-montserrat">
@@ -116,7 +116,7 @@ export default function AdminPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <Button asChild variant="outline" className="w-full border-eqtech-gray-medium text-eqtech-light hover:bg-eqtech-gray-medium font-montserrat">
+                  <Button asChild className="w-full bg-eqtech-gray-dark border border-eqtech-gray-medium text-eqtech-light hover:bg-eqtech-gray-medium font-montserrat">
                     <Link href="/admin/portfolios">
                       Manage Portfolios
                     </Link>
@@ -127,83 +127,8 @@ export default function AdminPage() {
                 </CardContent>
               </Card>
               
-              <Card className="bg-eqtech-gray-dark border-eqtech-gray-medium">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-eqtech-light font-montserrat">
-                    <Shield className="h-5 w-5 text-eqtech-gold" />
-                    Role Management
-                  </CardTitle>
-                  <CardDescription className="text-eqtech-gray-light font-roboto-flex">
-                    Configure roles and permissions
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <Button asChild variant="outline" className="w-full border-eqtech-gray-medium text-eqtech-light hover:bg-eqtech-gray-medium font-montserrat">
-                    <Link href="/admin/roles">
-                      Manage Roles
-                    </Link>
-                  </Button>
-                  <p className="text-sm text-eqtech-gray-light font-roboto-flex">
-                    Define role permissions and access levels
-                  </p>
-                </CardContent>
-              </Card>
-              
-              <Card className="bg-eqtech-gray-dark border-eqtech-gray-medium">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-eqtech-light font-montserrat">
-                    <Settings className="h-5 w-5 text-eqtech-gold" />
-                    System Settings
-                  </CardTitle>
-                  <CardDescription className="text-eqtech-gray-light font-roboto-flex">
-                    Configure system-wide settings
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <Button asChild variant="outline" className="w-full border-eqtech-gray-medium text-eqtech-light hover:bg-eqtech-gray-medium font-montserrat">
-                    <Link href="/admin/settings">
-                      System Settings
-                    </Link>
-                  </Button>
-                  <p className="text-sm text-eqtech-gray-light font-roboto-flex">
-                    Manage application configuration and preferences
-                  </p>
-                </CardContent>
-              </Card>
             </div>
 
-            {/* Recent Activity */}
-            <Card className="bg-eqtech-gray-dark border-eqtech-gray-medium">
-              <CardHeader>
-                <CardTitle className="text-eqtech-light font-montserrat">Recent Activity</CardTitle>
-                <CardDescription className="text-eqtech-gray-light font-roboto-flex">
-                  Latest user actions and system events
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 bg-eqtech-dark rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 bg-eqtech-gold rounded-full"></div>
-                      <span className="text-sm text-eqtech-light font-roboto-flex">System initialized</span>
-                    </div>
-                    <span className="text-xs text-eqtech-gray-light font-roboto-flex">Just now</span>
-                  </div>
-                  
-                  <div className="flex items-center justify-between p-3 bg-eqtech-dark rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 bg-eqtech-gold rounded-full"></div>
-                      <span className="text-sm text-eqtech-light font-roboto-flex">Role system enabled</span>
-                    </div>
-                    <span className="text-xs text-eqtech-gray-light font-roboto-flex">Just now</span>
-                  </div>
-                  
-                  <div className="text-center py-4 text-eqtech-gray-light">
-                    <p className="text-sm font-roboto-flex">Activity log will appear here once users start interacting with the system</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </main>
       </div>
