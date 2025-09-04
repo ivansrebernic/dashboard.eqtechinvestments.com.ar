@@ -11,6 +11,24 @@ interface MarketCapDataPoint {
   total_market_cap: number
 }
 
+interface HistoricalDataItem {
+  timestamp: string
+  quote?: {
+    USD?: {
+      total_market_cap?: number
+    }
+  }
+}
+
+interface TooltipProps {
+  active?: boolean
+  payload?: Array<{
+    value: number
+    [key: string]: unknown
+  }>
+  label?: string
+}
+
 export function GlobalMarketCapChart() {
   const [data, setData] = useState<MarketCapDataPoint[]>([])
   const [loading, setLoading] = useState(true)
@@ -27,7 +45,7 @@ export function GlobalMarketCapChart() {
         
         if (result.success && result.data?.data?.quotes) {
           // Transform the data for chart display
-          const chartData = result.data.data.quotes.map((item: any) => ({
+          const chartData = result.data.data.quotes.map((item: HistoricalDataItem) => ({
             timestamp: item.timestamp,
             total_market_cap: item.quote?.USD?.total_market_cap || 0,
             date: format(new Date(item.timestamp), 'MMM yyyy')
@@ -65,7 +83,7 @@ export function GlobalMarketCapChart() {
     return `$${(value / 1e6).toFixed(1)}M`
   }
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload, label }: TooltipProps) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-eqtech-surface/90 backdrop-blur-sm border border-eqtech-gold/20 rounded-lg p-3 shadow-lg">

@@ -3,7 +3,7 @@ import { getCoinMarketCapClient } from '@/lib/coinmarketcap/client'
 
 // Simple in-memory cache
 let globalHistoricalCache: {
-  data: any
+  data: unknown
   timestamp: number
 } = {
   data: null,

@@ -3,7 +3,17 @@
     "allow": [
       "mcp__zen__planner",
       "Bash(git add:*)",
-      "Bash(npm run lint)"
+      "Bash(npm run lint)",
+      "mcp__zen__debug",
+      "mcp__zen__analyze",
+      "Bash(npx shadcn@latest add:*)",
+      "mcp__zen__precommit",
+      "Bash(npm run build:*)",
+      "Read(/Users/ivansrebernic/Documents/**)",
+      "Bash(grep:*)",
+      "mcp__zen__chat",
+      "mcp__zen__challenge",
+      "Read(/Users/ivansrebernic/Documents/web-projects/eqtechinvestments.com.ar/**)"
     ],
     "deny": [],
     "ask": []

@@ -3,8 +3,15 @@
 import { useEffect, useState } from 'react'
 import { Card } from '@/components/ui/card'
 
+interface FearGreedData {
+  value: string
+  value_classification: string
+  timestamp: string
+  time_until_update: string
+}
+
 export function FearGreedIndex() {
-  const [data, setData] = useState<any>(null)
+  const [data, setData] = useState<FearGreedData | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {

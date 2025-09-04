@@ -168,7 +168,7 @@ export function PortfolioDashboard() {
       // Use real historical data
       return portfolio.historicalData.map(dataPoint => ({
         date: format(new Date(dataPoint.timestamp), 'MMM dd'),
-        value: dataPoint.roiPercent || 0,
+        value: dataPoint.value || 0,
         timestamp: dataPoint.timestamp
       }))
     }

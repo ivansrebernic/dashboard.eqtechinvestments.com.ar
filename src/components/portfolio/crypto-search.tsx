@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { ChevronDown, Search, Loader2 } from 'lucide-react'
+import Image from 'next/image'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -121,9 +122,11 @@ export function CryptoSearch({ onSelect, placeholder = "Search cryptocurrencies.
         <div className="flex items-center gap-3 p-3 border border-eqtech-gray-medium rounded-md bg-eqtech-dark">
           <div className="flex items-center gap-2 flex-1">
             <div className="w-6 h-6 rounded-full overflow-hidden bg-eqtech-gray-medium flex items-center justify-center">
-              <img
+              <Image
                 src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${selectedCrypto.id}.png`}
                 alt={`${selectedCrypto.name} logo`}
+                width={24}
+                height={24}
                 className="w-full h-full object-cover"
                 onError={(e) => {
                   // Fallback to initial letter if image fails to load
@@ -204,9 +207,11 @@ export function CryptoSearch({ onSelect, placeholder = "Search cryptocurrencies.
                     >
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full overflow-hidden bg-eqtech-gray-medium flex items-center justify-center">
-                          <img
+                          <Image
                             src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${crypto.id}.png`}
                             alt={`${crypto.name} logo`}
+                            width={32}
+                            height={32}
                             className="w-full h-full object-cover"
                             onError={(e) => {
                               // Fallback to initial letter if image fails to load

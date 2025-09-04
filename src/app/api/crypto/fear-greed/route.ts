@@ -1,8 +1,18 @@
 import { NextResponse } from 'next/server'
 
+// Fear & Greed API response interface
+interface FearGreedApiResponse {
+  data: Array<{
+    value: string
+    value_classification: string
+    timestamp: string
+    time_until_update: string
+  }>
+}
+
 // Simple in-memory cache
 let fearGreedCache: {
-  data: any
+  data: FearGreedApiResponse | null
   timestamp: number
 } = {
   data: null,
@@ -49,7 +59,7 @@ export async function GET() {
       cached: false
     })
 
-  } catch (error) {
+  } catch {
     // Return stale data if available
     if (fearGreedCache.data) {
       return NextResponse.json({
