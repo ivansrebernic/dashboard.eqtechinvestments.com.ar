@@ -9,14 +9,10 @@ import { RoleBadge } from '@/components/roles/role-badge'
 import { useUserRole, usePermissions } from '@/lib/roles/hooks'
 import { 
   Home, 
-  BarChart3, 
-  Settings, 
-  Users, 
   Shield, 
   Menu, 
   X,
   LogOut,
-  Briefcase,
   ChevronRight
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -30,39 +26,16 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   {
-    href: '/dashboard',
+    href: '/',
     label: 'Dashboard',
     icon: Home,
     permission: 'canAccessDashboard'
-  },
-  {
-    href: '/crypto',
-    label: 'Crypto',
-    icon: BarChart3,
-    permission: 'canViewCrypto'
   },
   {
     href: '/admin',
     label: 'Admin',
     icon: Shield,
     permission: 'canAccessAdmin'
-  },
-  {
-    href: '/admin/users',
-    label: 'User Management',
-    icon: Users,
-    permission: 'canManageUsers'
-  },
-  {
-    href: '/admin/portfolios',
-    label: 'Portfolio Management',
-    icon: Briefcase,
-    permission: 'canAccessAdmin'
-  },
-  {
-    href: '/settings',
-    label: 'Settings',
-    icon: Settings
   }
 ]
 
@@ -187,7 +160,7 @@ export function NavMenu() {
             <div className="space-y-1">
               {filteredNavItems.map((item, index) => {
                 const isActive = pathname === item.href || 
-                  (item.href !== '/dashboard' && pathname.startsWith(item.href))
+                  (item.href !== '/' && pathname.startsWith(item.href))
                 
                 return (
                   <div key={item.href} className="relative group">

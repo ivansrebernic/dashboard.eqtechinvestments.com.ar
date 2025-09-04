@@ -19,13 +19,7 @@ export default async function HomePage() {
       <main className="flex-1 relative min-w-0 overflow-auto">
         {/* Premium Header Bar */}
         <div className="flex justify-end p-6 border-b border-eqtech-gold/10 backdrop-blur-xl bg-eqtech-surface/20">
-          <div className="flex items-center space-x-4">
-            {/* Live indicator */}
-            <div className="flex items-center space-x-2 px-3 py-2 bg-eqtech-surface/60 rounded-xl border border-eqtech-gold/20">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-              <span className="text-xs text-eqtech-gray-light font-roboto-flex uppercase tracking-wider">Live</span>
-            </div>
-            
+          <div className="flex items-center space-x-4">            
             {/* Logout button with premium styling */}
             <form action={logout}>
               <Button 
