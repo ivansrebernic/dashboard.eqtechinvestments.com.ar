@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -124,8 +125,14 @@ export function NavMenu() {
               <div className="flex items-center space-x-4">
                 {/* Premium Logo/Brand Icon */}
                 <div className="relative">
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-eqtech-gold via-eqtech-gold-light to-eqtech-gold-light flex items-center justify-center shadow-2xl shadow-eqtech-gold/30">
-                    <Shield className="h-6 w-6 text-eqtech-dark" />
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-eqtech-gold via-eqtech-gold-light to-eqtech-gold-light flex items-center justify-center shadow-2xl shadow-eqtech-gold/30 overflow-hidden">
+                    <Image 
+                      src="/logo.png" 
+                      alt="EQTech Investments Logo" 
+                      width={32} 
+                      height={32} 
+                      className="object-contain"
+                    />
                   </div>
                   <div className="absolute inset-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-eqtech-gold to-eqtech-gold-light opacity-50 blur-lg"></div>
                 </div>

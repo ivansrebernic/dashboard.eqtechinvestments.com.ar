@@ -31,6 +31,15 @@ const dmSerif = DM_Serif_Text({
 export const metadata: Metadata = {
   title: "EQTech Investments - Portfolio Management",
   description: "Professional portfolio management and investment tracking platform",
+  icons: {
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    shortcut: '/favicon.ico',
+    apple: '/icon-192.png',
+  },
 };
 
 export default function RootLayout({
