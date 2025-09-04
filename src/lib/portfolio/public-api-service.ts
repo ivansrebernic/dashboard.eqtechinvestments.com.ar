@@ -1,5 +1,6 @@
 import { Portfolio, PortfolioPerformance, HoldingPerformance, PortfolioMetrics, AssetPerformance } from '@/types/portfolio'
 import { cryptoService } from '@/lib/coinmarketcap/services'
+import { historicalDataService, type HistoricalPortfolioData } from './historical-data-service'
 
 interface ApiResponse<T = unknown> {
   success: boolean
@@ -202,6 +203,28 @@ export class PublicPortfolioService {
       lastUpdated: new Date().toISOString()
     }
   }
+
+  /**
+   * Calculate historical portfolio performance
+   */
+  async calculateHistoricalPerformance(
+    portfolio: Portfolio,
+    days: number = 30
+  ): Promise<HistoricalPortfolioData[]> {
+    try {
+      // Get current performance to ensure we have up-to-date holdings data
+      const currentPerformance = await this.calculatePerformance(portfolio)
+      
+      return await historicalDataService.calculateHistoricalPortfolioPerformance(
+        portfolio,
+        currentPerformance.holdings,
+        days
+      )
+    } catch (error) {
+      console.error('Error calculating historical portfolio performance:', error)
+      return []
+    }
+  }
 }
 
 // Create singleton instance
@@ -212,6 +235,8 @@ export function usePublicPortfolios() {
   return {
     getPortfolios: () => publicPortfolioService.getPortfolios(),
     calculatePerformance: (portfolio: Portfolio) => 
-      publicPortfolioService.calculatePerformance(portfolio)
+      publicPortfolioService.calculatePerformance(portfolio),
+    calculateHistoricalPerformance: (portfolio: Portfolio, days?: number) =>
+      publicPortfolioService.calculateHistoricalPerformance(portfolio, days)
   }
 }

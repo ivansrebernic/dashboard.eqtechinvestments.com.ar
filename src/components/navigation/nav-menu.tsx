@@ -126,22 +126,22 @@ export function NavMenu() {
 
       {/* Navigation sidebar */}
       <div className={cn(
-        "fixed left-0 top-0 z-40 h-screen w-72 relative overflow-hidden transition-transform duration-300 ease-in-out md:sticky md:translate-x-0 md:h-screen md:top-0 shadow-2xl shadow-black/20",
+        "fixed left-0 top-0 z-40 h-screen w-72 relative overflow-hidden transition-transform duration-300 ease-in-out md:sticky md:translate-x-0 md:h-screen md:top-0 md:self-start md:max-h-screen shadow-2xl shadow-black/20",
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         {/* Premium Multi-layered background with advanced patterns */}
         <div className="absolute inset-0 bg-gradient-to-br from-eqtech-dark via-eqtech-darker to-eqtech-dark">
           {/* Luxury mesh gradient overlay */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--eqtech-gold)_0%,_var(--eqtech-copper)_30%,_transparent_70%)] opacity-12"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--eqtech-gold)_0%,_var(--eqtech-gold-light)_30%,_transparent_70%)] opacity-12"></div>
           {/* Premium geometric pattern */}
           <div className="absolute inset-0 bg-[linear-gradient(135deg,_transparent_0%,_var(--eqtech-gold-light)_1%,_transparent_2%,_transparent_48%,_var(--eqtech-gold)_49%,_transparent_50%)] opacity-20"></div>
           {/* Sophisticated noise texture */}
           <div className="absolute inset-0 bg-[repeating-conic-gradient(from_0deg_at_50%_50%,_transparent_0deg,_var(--eqtech-gold)_2deg,_transparent_4deg)] opacity-8"></div>
           {/* Enhanced glow border with gradient */}
-          <div className="absolute inset-y-0 right-0 w-px bg-gradient-to-b from-transparent via-eqtech-gold/50 to-eqtech-copper/30 shadow-lg shadow-eqtech-gold/20"></div>
+          <div className="absolute inset-y-0 right-0 w-px bg-gradient-to-b from-transparent via-eqtech-gold/50 to-eqtech-gold-light/30 shadow-lg shadow-eqtech-gold/20"></div>
           {/* Floating light orbs */}
           <div className="absolute top-1/4 right-8 w-32 h-32 bg-gradient-to-br from-eqtech-gold/10 to-transparent rounded-full blur-3xl opacity-30"></div>
-          <div className="absolute bottom-1/3 right-4 w-24 h-24 bg-gradient-to-br from-eqtech-copper/10 to-transparent rounded-full blur-2xl opacity-40"></div>
+          <div className="absolute bottom-1/3 right-4 w-24 h-24 bg-gradient-to-br from-eqtech-gold-light/10 to-transparent rounded-full blur-2xl opacity-40"></div>
         </div>
         
         <div className="relative flex h-full flex-col backdrop-blur-sm">
@@ -151,10 +151,10 @@ export function NavMenu() {
               <div className="flex items-center space-x-4">
                 {/* Premium Logo/Brand Icon */}
                 <div className="relative">
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-eqtech-gold via-eqtech-gold-light to-eqtech-copper flex items-center justify-center shadow-2xl shadow-eqtech-gold/30">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-eqtech-gold via-eqtech-gold-light to-eqtech-gold-light flex items-center justify-center shadow-2xl shadow-eqtech-gold/30">
                     <Shield className="h-6 w-6 text-eqtech-dark" />
                   </div>
-                  <div className="absolute inset-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-eqtech-gold to-eqtech-copper opacity-50 blur-lg"></div>
+                  <div className="absolute inset-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-eqtech-gold to-eqtech-gold-light opacity-50 blur-lg"></div>
                 </div>
                 <div className="space-y-1">
                   <h2 className="font-bold text-xl text-eqtech-light font-montserrat tracking-tight">EQTech</h2>
@@ -197,14 +197,14 @@ export function NavMenu() {
                       className={cn(
                         "flex items-center space-x-4 px-6 py-4 rounded-2xl text-sm font-medium transition-all duration-300 font-roboto-flex relative overflow-hidden group",
                         isActive 
-                          ? "bg-gradient-to-r from-eqtech-gold/25 via-eqtech-gold-light/20 to-eqtech-copper/15 text-eqtech-light border border-eqtech-gold/30 shadow-xl shadow-eqtech-gold/10" 
-                          : "text-eqtech-gray-light hover:text-eqtech-light hover:bg-gradient-to-r hover:from-eqtech-gold/8 hover:to-eqtech-copper/5 hover:border-eqtech-gold/15 border border-transparent hover:shadow-lg hover:shadow-eqtech-gold/5"
+                          ? "bg-gradient-to-r from-eqtech-gold/25 via-eqtech-gold-light/20 to-eqtech-gold-light/15 text-eqtech-light border border-eqtech-gold/30 shadow-xl shadow-eqtech-gold/10" 
+                          : "text-eqtech-gray-light hover:text-eqtech-light hover:bg-gradient-to-r hover:from-eqtech-gold/8 hover:to-eqtech-gold-light/5 hover:border-eqtech-gold/15 border border-transparent hover:shadow-lg hover:shadow-eqtech-gold/5"
                       )}
                     >
                       {/* Enhanced Active indicator */}
                       {isActive && (
                         <>
-                          <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-1.5 h-12 bg-gradient-to-b from-eqtech-gold via-eqtech-gold-light to-eqtech-copper rounded-full shadow-lg shadow-eqtech-gold/50"></div>
+                          <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-1.5 h-12 bg-gradient-to-b from-eqtech-gold via-eqtech-gold-light to-eqtech-gold-light rounded-full shadow-lg shadow-eqtech-gold/50"></div>
                           <div className="absolute inset-0 bg-gradient-to-r from-eqtech-gold/10 via-transparent to-transparent opacity-50"></div>
                         </>
                       )}
@@ -213,7 +213,7 @@ export function NavMenu() {
                       <div className={cn(
                         "relative flex items-center justify-center w-10 h-10 transition-all duration-300 rounded-xl",
                         isActive 
-                          ? "bg-gradient-to-br from-eqtech-gold/20 to-eqtech-copper/15 drop-shadow-[0_0_12px_var(--eqtech-gold)] shadow-inner" 
+                          ? "bg-gradient-to-br from-eqtech-gold/20 to-eqtech-gold-light/15 drop-shadow-[0_0_12px_var(--eqtech-gold)] shadow-inner" 
                           : "group-hover:bg-eqtech-gold/10 group-hover:drop-shadow-[0_0_6px_var(--eqtech-gold)]"
                       )}>
                         <item.icon className={cn(
@@ -234,14 +234,14 @@ export function NavMenu() {
                       )} />
                       
                       {/* Premium background shimmer effect */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-eqtech-gold/10 to-eqtech-copper/8 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-x-[-100%] group-hover:translate-x-[100%] rounded-2xl"></div>
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-eqtech-gold/10 to-eqtech-gold-light/8 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-x-[-100%] group-hover:translate-x-[100%] rounded-2xl"></div>
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-700 transform translate-x-[-100%] group-hover:translate-x-[100%] rounded-2xl"></div>
                     </Link>
                     
                     {/* Enhanced separator line */}
                     {index < filteredNavItems.length - 1 && (
                       <div className="mx-6 mt-3 h-px bg-gradient-to-r from-transparent via-eqtech-gold/10 to-transparent relative">
-                        <div className="absolute inset-0 h-px bg-gradient-to-r from-transparent via-eqtech-copper/5 to-transparent blur-sm"></div>
+                        <div className="absolute inset-0 h-px bg-gradient-to-r from-transparent via-eqtech-gold-light/5 to-transparent blur-sm"></div>
                       </div>
                     )}
                   </div>

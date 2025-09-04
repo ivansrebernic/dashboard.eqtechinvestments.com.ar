@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { publicPortfolioService } from '@/lib/portfolio/public-api-service'
 import { Portfolio, PortfolioPerformance, HoldingPerformance } from '@/types/portfolio'
+import { HistoricalPortfolioData } from '@/lib/portfolio/historical-data-service'
 import { formatters } from '@/lib/coinmarketcap/services'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar } from 'recharts'
 import { TrendingUp, TrendingDown, Wallet, DollarSign, Activity, BarChart3, ChevronDown, Coins, Clock, Zap } from 'lucide-react'
@@ -12,9 +13,10 @@ interface PortfolioWithPerformance extends Portfolio {
   performance: PortfolioPerformance
   loading: boolean
   error?: string
+  historicalData?: HistoricalPortfolioData[]
 }
 
-const CHART_COLORS = ['#d4af37', '#e6c86b', '#f2d98f', '#c4941a', '#b8860b', '#cd7f32', '#da8a67', '#ff7f50']
+const CHART_COLORS = ['#d4af37', '#e6c86b', '#f2d98f', '#c4941a', '#b8860b', '#e6c46b', '#f0d982', '#deb887']
 
 export function PortfolioDashboard() {
   const [portfolios, setPortfolios] = useState<PortfolioWithPerformance[]>([])
@@ -24,6 +26,7 @@ export function PortfolioDashboard() {
   const [error, setError] = useState<string | null>(null)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [lastUpdated, setLastUpdated] = useState<string>('')
+  const [historicalDataLoading, setHistoricalDataLoading] = useState(false)
 
   const fetchPortfoliosData = useCallback(async () => {
     try {
@@ -86,6 +89,32 @@ export function PortfolioDashboard() {
     }
   }, [selectedPortfolioId])
 
+  // Fetch historical data for selected portfolio
+  const fetchHistoricalData = useCallback(async (portfolio: Portfolio) => {
+    if (!portfolio) return
+
+    try {
+      setHistoricalDataLoading(true)
+      const historicalData = await publicPortfolioService.calculateHistoricalPerformance(portfolio, 30)
+      
+      // Update the selected portfolio with historical data
+      setSelectedPortfolio(prev => prev ? {
+        ...prev,
+        historicalData
+      } : null)
+
+      // Also update in portfolios array
+      setPortfolios(prev => prev.map(p => 
+        p.id === portfolio.id ? { ...p, historicalData } : p
+      ))
+
+    } catch (error) {
+      console.error('Error fetching historical data:', error)
+    } finally {
+      setHistoricalDataLoading(false)
+    }
+  }, [])
+
   useEffect(() => {
     fetchPortfoliosData()
   }, [fetchPortfoliosData])
@@ -99,6 +128,13 @@ export function PortfolioDashboard() {
     return () => clearInterval(interval)
   }, [fetchPortfoliosData])
 
+  // Fetch historical data when portfolio is selected
+  useEffect(() => {
+    if (selectedPortfolio && !selectedPortfolio.historicalData) {
+      fetchHistoricalData(selectedPortfolio)
+    }
+  }, [selectedPortfolio, fetchHistoricalData])
+
   const handlePortfolioSelection = (portfolioId: string) => {
     const selected = portfolios.find(p => p.id === portfolioId)
     if (selected) {
@@ -108,7 +144,18 @@ export function PortfolioDashboard() {
     }
   }
 
-  const generateMockChartData = (portfolio: PortfolioWithPerformance) => {
+  // Use real historical data or fall back to mock data
+  const getChartData = (portfolio: PortfolioWithPerformance) => {
+    if (portfolio.historicalData && portfolio.historicalData.length > 0) {
+      // Use real historical data
+      return portfolio.historicalData.map(dataPoint => ({
+        date: format(new Date(dataPoint.timestamp), 'MMM dd'),
+        value: dataPoint.value,
+        timestamp: dataPoint.timestamp
+      }))
+    }
+
+    // Fallback to mock data (should rarely happen now)
     const data = []
     for (let i = 30; i >= 0; i--) {
       const date = subDays(new Date(), i)
@@ -171,7 +218,7 @@ export function PortfolioDashboard() {
     <div className="min-h-screen bg-eqtech-dark relative overflow-hidden">
       {/* Premium background effects */}
       <div className="absolute top-20 right-20 w-96 h-96 bg-eqtech-gold/5 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-20 left-20 w-80 h-80 bg-eqtech-copper/3 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-20 left-20 w-80 h-80 bg-eqtech-gold/3 rounded-full blur-3xl"></div>
       
       <div className="relative z-10 max-w-8xl mx-auto p-8">
         {/* Enhanced Header with Portfolio Selector */}
@@ -179,7 +226,7 @@ export function PortfolioDashboard() {
           <div className="flex items-end justify-between mb-6">
             <div className="space-y-2">
               <div className="flex items-center space-x-3">
-                <div className="w-3 h-8 bg-gradient-to-b from-eqtech-gold to-eqtech-copper rounded-full shadow-lg shadow-eqtech-gold/20"></div>
+                <div className="w-3 h-8 bg-gradient-to-b from-eqtech-gold to-eqtech-gold-light rounded-full shadow-lg shadow-eqtech-gold/20"></div>
                 <h1 className="text-6xl font-bold text-eqtech-light font-serif tracking-tight">
                   Portfolio
                 </h1>
@@ -230,12 +277,12 @@ export function PortfolioDashboard() {
                         onClick={() => handlePortfolioSelection(portfolio.id)}
                         className={`group w-full text-left p-4 rounded-xl hover:bg-eqtech-surface-elevated/80 transition-all duration-200 relative overflow-hidden ${
                           selectedPortfolioId === portfolio.id 
-                            ? 'bg-gradient-to-r from-eqtech-gold/20 to-eqtech-copper/10 border border-eqtech-gold/30 text-eqtech-light' 
+                            ? 'bg-gradient-to-r from-eqtech-gold/20 to-eqtech-gold-light/10 border border-eqtech-gold/30 text-eqtech-light' 
                             : 'text-eqtech-light hover:border hover:border-eqtech-gray-medium/20'
                         }`}
                       >
                         {selectedPortfolioId === portfolio.id && (
-                          <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-eqtech-gold to-eqtech-copper rounded-full"></div>
+                          <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-eqtech-gold to-eqtech-gold-light rounded-full"></div>
                         )}
                         <div className="flex items-start justify-between mb-2">
                           <span className="font-medium text-lg">{portfolio.name}</span>
@@ -310,12 +357,12 @@ export function PortfolioDashboard() {
               </div>
 
               {/* Asset Count */}
-              <div className="group relative bg-gradient-to-br from-eqtech-surface/80 via-eqtech-surface-elevated/60 to-eqtech-surface/80 backdrop-blur-xl border border-eqtech-gray-medium/20 rounded-3xl p-8 hover:border-eqtech-copper/30 transition-all duration-500 hover:shadow-2xl hover:shadow-eqtech-copper/10 overflow-hidden">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-eqtech-copper/10 to-transparent rounded-full blur-2xl"></div>
+              <div className="group relative bg-gradient-to-br from-eqtech-surface/80 via-eqtech-surface-elevated/60 to-eqtech-surface/80 backdrop-blur-xl border border-eqtech-gray-medium/20 rounded-3xl p-8 hover:border-eqtech-gold/30 transition-all duration-500 hover:shadow-2xl hover:shadow-eqtech-gold/10 overflow-hidden">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-eqtech-gold/10 to-transparent rounded-full blur-2xl"></div>
                 <div className="relative">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="p-4 bg-gradient-to-br from-eqtech-copper/20 to-eqtech-copper/10 rounded-2xl backdrop-blur-sm">
-                      <Coins className="w-8 h-8 text-eqtech-copper" />
+                    <div className="p-4 bg-gradient-to-br from-eqtech-gold/20 to-eqtech-gold/10 rounded-2xl backdrop-blur-sm">
+                      <Coins className="w-8 h-8 text-eqtech-gold" />
                     </div>
                     <div className="text-xs text-eqtech-gray-light uppercase tracking-wider">Assets</div>
                   </div>
@@ -434,10 +481,13 @@ export function PortfolioDashboard() {
                 <h3 className="text-2xl font-semibold text-eqtech-light mb-6 flex items-center space-x-3">
                   <Activity className="w-6 h-6 text-eqtech-gold" />
                   <span>Performance Trends</span>
+                  {historicalDataLoading && (
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-eqtech-gold border-t-transparent"></div>
+                  )}
                 </h3>
                 {selectedPortfolio.performance.totalValue > 0 ? (
                   <ResponsiveContainer width="100%" height={400}>
-                    <LineChart data={generateMockChartData(selectedPortfolio)}>
+                    <LineChart data={getChartData(selectedPortfolio)}>
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
                       <XAxis dataKey="date" stroke="#888" fontSize={12} />
                       <YAxis stroke="#888" tickFormatter={(value) => formatters.currencyCompact(value)} fontSize={12} />
@@ -528,7 +578,7 @@ export function PortfolioDashboard() {
                               <div className="flex items-center justify-end space-x-2">
                                 <div className="w-16 h-2 bg-eqtech-gray-dark rounded-full overflow-hidden">
                                   <div 
-                                    className="h-full bg-gradient-to-r from-eqtech-gold to-eqtech-copper rounded-full transition-all duration-500"
+                                    className="h-full bg-gradient-to-r from-eqtech-gold to-eqtech-gold-light rounded-full transition-all duration-500"
                                     style={{ width: `${Math.min(100, holding.portfolioWeight)}%` }}
                                   ></div>
                                 </div>

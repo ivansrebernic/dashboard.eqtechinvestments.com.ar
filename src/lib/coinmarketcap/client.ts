@@ -135,6 +135,34 @@ export class CoinMarketCapClient {
 
     return this.makeRequest<PriceConversionResponse>('/tools/price-conversion', queryParams)
   }
+
+  /**
+   * Get historical cryptocurrency quotes
+   */
+  async getHistoricalQuotes(params: {
+    symbol: string
+    time_start?: string
+    time_end?: string
+    count?: number
+    interval?: '5m' | '10m' | '15m' | '30m' | '45m' | '1h' | '2h' | '3h' | '4h' | '6h' | '12h' | '1d' | '2d' | '3d' | '7d' | '14d' | '15d' | '30d' | '60d' | '90d' | '365d'
+    convert?: string
+  }): Promise<any> {
+    const queryParams: Record<string, string> = {
+      symbol: params.symbol,
+      convert: 'USD',
+      interval: '1d',
+      count: '30'
+    }
+
+    // Override with provided params
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined) {
+        queryParams[key] = value.toString()
+      }
+    })
+
+    return this.makeRequest<any>('/cryptocurrency/quotes/historical', queryParams)
+  }
 }
 
 // Singleton instance
