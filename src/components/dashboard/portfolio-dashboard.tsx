@@ -20,6 +20,22 @@ interface PortfolioWithPerformance extends Portfolio {
 
 const CHART_COLORS = ['#d4af37', '#e6c86b', '#f2d98f', '#c4941a', '#b8860b', '#e6c46b', '#f0d982', '#deb887']
 
+// Helper function to calculate weighted ROI for a portfolio
+function calculateWeightedROI(holdings: { portfolioWeight: number; priceChangePercent24h: number }[]): number {
+  if (!holdings || holdings.length === 0) return 0
+  
+  return holdings.reduce((sum, holding) => {
+    const weight = holding.portfolioWeight || 0
+    const roi = holding.priceChangePercent24h || 0
+    return sum + (weight * roi) / 100
+  }, 0)
+}
+
+// Helper function to format percentage values
+function formatPercentage(value: number): string {
+  return `${value >= 0 ? '+' : ''}${value.toFixed(2)}%`
+}
+
 export function PortfolioDashboard() {
   const [portfolios, setPortfolios] = useState<PortfolioWithPerformance[]>([])
   const [selectedPortfolioId, setSelectedPortfolioId] = useState<string | null>(null)
@@ -152,20 +168,20 @@ export function PortfolioDashboard() {
       // Use real historical data
       return portfolio.historicalData.map(dataPoint => ({
         date: format(new Date(dataPoint.timestamp), 'MMM dd'),
-        value: dataPoint.value,
+        value: dataPoint.roiPercent || 0,
         timestamp: dataPoint.timestamp
       }))
     }
 
-    // Fallback to mock data (should rarely happen now)
+    // Fallback to mock ROI data (should rarely happen now)
     const data = []
+    const baseROI = portfolio.performance.totalChangePercent24h || 0
     for (let i = 30; i >= 0; i--) {
       const date = subDays(new Date(), i)
-      const baseValue = portfolio.performance.totalValue
-      const variance = baseValue * 0.1 * (Math.random() - 0.5)
+      const variance = baseROI * 0.2 * (Math.random() - 0.5)
       data.push({
         date: format(date, 'MMM dd'),
-        value: Math.max(0, baseValue + variance),
+        value: baseROI + variance,
         timestamp: date.getTime()
       })
     }
@@ -177,10 +193,8 @@ export function PortfolioDashboard() {
     
     return selectedPortfolio.performance.holdings.map((holding, index) => ({
       name: holding.symbol,
-      value: holding.totalValue,
-      percentage: selectedPortfolio.performance.totalValue > 0 
-        ? (holding.totalValue / selectedPortfolio.performance.totalValue) * 100 
-        : 0,
+      value: holding.portfolioWeight,
+      percentage: holding.portfolioWeight,
       color: CHART_COLORS[index % CHART_COLORS.length]
     })).filter(item => item.value > 0)
   }
@@ -289,7 +303,7 @@ export function PortfolioDashboard() {
                         <div className="flex items-start justify-between mb-2">
                           <span className="font-medium text-lg">{portfolio.name}</span>
                           <span className="text-sm font-bold text-eqtech-gold">
-                            {formatters.currency(portfolio.performance.totalValue)}
+                            {formatPercentage(calculateWeightedROI(portfolio.performance.holdings))}
                           </span>
                         </div>
                         {portfolio.description && (
@@ -344,11 +358,11 @@ export function PortfolioDashboard() {
                     <div className="p-4 bg-gradient-to-br from-eqtech-gold/20 to-eqtech-gold/10 rounded-2xl backdrop-blur-sm">
                       <DollarSign className="w-8 h-8 text-eqtech-gold" />
                     </div>
-                    <div className="text-xs text-eqtech-gray-light uppercase tracking-wider">Total Value</div>
+                    <div className="text-xs text-eqtech-gray-light uppercase tracking-wider">Portfolio ROI</div>
                   </div>
                   <div className="space-y-2">
                     <p className="text-4xl font-bold text-eqtech-light tracking-tight">
-                      {formatters.currency(selectedPortfolio.performance.totalValue)}
+                      {formatPercentage(calculateWeightedROI(selectedPortfolio.performance.holdings))}
                     </p>
                     {selectedPortfolio.performance.totalChangePercent24h !== 0 && (
                       <div className={`flex items-center space-x-2 text-sm font-medium ${
@@ -468,7 +482,7 @@ export function PortfolioDashboard() {
                         ))}
                       </Pie>
                       <Tooltip 
-                        formatter={(value: number) => [formatters.currency(value), 'Value']}
+                        formatter={(value: number) => [`${value.toFixed(1)}%`, 'Portfolio Weight']}
                         contentStyle={{
                           backgroundColor: 'rgba(15, 20, 25, 0.95)',
                           border: '1px solid rgba(212, 175, 55, 0.3)',
@@ -495,14 +509,14 @@ export function PortfolioDashboard() {
                     <div className="animate-spin rounded-full h-5 w-5 border-2 border-eqtech-gold border-t-transparent"></div>
                   )}
                 </h3>
-                {selectedPortfolio.performance.totalValue > 0 ? (
+                {selectedPortfolio.performance.holdings.length > 0 ? (
                   <ResponsiveContainer width="100%" height={400}>
                     <LineChart data={getChartData(selectedPortfolio)}>
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
                       <XAxis dataKey="date" stroke="#888" fontSize={12} />
-                      <YAxis stroke="#888" tickFormatter={(value) => formatters.currencyCompact(value)} fontSize={12} />
+                      <YAxis stroke="#888" tickFormatter={(value) => `${value.toFixed(1)}%`} fontSize={12} />
                       <Tooltip 
-                        formatter={(value: number) => [formatters.currency(value), 'Portfolio Value']}
+                        formatter={(value: number) => [`${value.toFixed(2)}%`, 'ROI Trend']}
                         contentStyle={{
                           backgroundColor: 'rgba(15, 20, 25, 0.95)',
                           border: '1px solid rgba(212, 175, 55, 0.3)',
@@ -541,16 +555,15 @@ export function PortfolioDashboard() {
                     <thead>
                       <tr className="border-b border-eqtech-gray-medium/30">
                         <th className="text-left py-4 px-2 text-eqtech-gray-light font-medium text-sm uppercase tracking-wider">Asset</th>
-                        <th className="text-right py-4 px-2 text-eqtech-gray-light font-medium text-sm uppercase tracking-wider">Amount</th>
                         <th className="text-right py-4 px-2 text-eqtech-gray-light font-medium text-sm uppercase tracking-wider">Price</th>
                         <th className="text-right py-4 px-2 text-eqtech-gray-light font-medium text-sm uppercase tracking-wider">24h Change</th>
-                        <th className="text-right py-4 px-2 text-eqtech-gray-light font-medium text-sm uppercase tracking-wider">Total Value</th>
-                        <th className="text-right py-4 px-2 text-eqtech-gray-light font-medium text-sm uppercase tracking-wider">Weight</th>
+                        <th className="text-right py-4 px-2 text-eqtech-gray-light font-medium text-sm uppercase tracking-wider">Portfolio Weight %</th>
+                        <th className="text-right py-4 px-2 text-eqtech-gray-light font-medium text-sm uppercase tracking-wider">Visual Weight</th>
                       </tr>
                     </thead>
                     <tbody>
                       {selectedPortfolio.performance.holdings
-                        .sort((a, b) => b.totalValue - a.totalValue)
+                        .sort((a, b) => b.portfolioWeight - a.portfolioWeight)
                         .map((holding, index) => (
                           <tr key={index} className="border-b border-eqtech-gray-medium/20 hover:bg-eqtech-surface-elevated/30 transition-colors group">
                             <td className="py-6 px-2">
@@ -558,9 +571,6 @@ export function PortfolioDashboard() {
                                 <div className={`w-4 h-4 rounded-full flex-shrink-0`} style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }}></div>
                                 <span className="font-semibold text-eqtech-light text-lg">{holding.symbol}</span>
                               </div>
-                            </td>
-                            <td className="text-right py-6 px-2 text-eqtech-light font-medium">
-                              {holding.amount.toLocaleString(undefined, { maximumFractionDigits: 6 })}
                             </td>
                             <td className="text-right py-6 px-2 text-eqtech-light font-medium">
                               {formatters.currency(holding.currentPrice)}
@@ -582,7 +592,7 @@ export function PortfolioDashboard() {
                               )}
                             </td>
                             <td className="text-right py-6 px-2 text-eqtech-light font-bold text-lg">
-                              {formatters.currency(holding.totalValue)}
+                              {holding.portfolioWeight.toFixed(1)}%
                             </td>
                             <td className="text-right py-6 px-2">
                               <div className="flex items-center justify-end space-x-2">
