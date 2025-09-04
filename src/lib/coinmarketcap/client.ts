@@ -23,6 +23,13 @@ export class CoinMarketCapClient {
       })
     }
 
+    // 🔍 API CALL TRACKING
+    console.log(`🌐 CoinMarketCap API Call: ${endpoint}`, {
+      timestamp: new Date().toISOString(),
+      params: params || {},
+      url: url.toString()
+    })
+
     const response = await fetch(url.toString(), {
       method: 'GET',
       headers: {
@@ -37,7 +44,9 @@ export class CoinMarketCapClient {
       throw new Error(`CoinMarketCap API error: ${response.status} - ${errorText}`)
     }
 
-    return response.json()
+    const result = await response.json()
+    console.log(`✅ API Response received for ${endpoint}`)
+    return result
   }
 
   /**

@@ -82,6 +82,58 @@ export class CryptoService {
       throw new Error('Failed to search cryptocurrency data')
     }
   }
+
+  /**
+   * Get multiple cryptocurrencies by symbols - BATCH OPTIMIZED
+   * Uses /api/crypto/batch endpoint for efficient bulk lookups
+   */
+  async getCryptocurrenciesBySymbols(symbols: string[]): Promise<Map<string, CryptoCurrency | null>> {
+    if (symbols.length === 0) {
+      return new Map()
+    }
+
+    try {
+      const response = await fetch('/api/crypto/batch', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ symbols }),
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        const map = new Map<string, CryptoCurrency | null>()
+        for (const [symbol, crypto] of Object.entries(result.data)) {
+          map.set(symbol, crypto as CryptoCurrency | null)
+        }
+        return map
+      } else {
+        throw new Error(result.error || 'Failed to fetch batch cryptocurrency data')
+      }
+    } catch (error) {
+      console.error('Error fetching batch cryptocurrencies:', error)
+      
+      // Fallback to individual requests if batch fails
+      console.log('Falling back to individual cryptocurrency requests')
+      const result = new Map<string, CryptoCurrency | null>()
+      
+      await Promise.allSettled(
+        symbols.map(async (symbol) => {
+          try {
+            const crypto = await this.getCryptocurrencyBySymbol(symbol)
+            result.set(symbol.toUpperCase(), crypto)
+          } catch (error) {
+            console.warn(`Failed to fetch ${symbol}:`, error)
+            result.set(symbol.toUpperCase(), null)
+          }
+        })
+      )
+      
+      return result
+    }
+  }
 }
 
 // Utility functions for formatting cryptocurrency data
