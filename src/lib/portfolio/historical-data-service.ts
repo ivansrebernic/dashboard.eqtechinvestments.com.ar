@@ -134,30 +134,33 @@ class HistoricalDataServiceClass {
   /**
    * Transform CoinMarketCap historical data format
    */
-  private transformCoinMarketCapData(cmcData: any): HistoricalQuote[] {
+  private transformCoinMarketCapData(cmcData: unknown): HistoricalQuote[] {
     try {
       // CoinMarketCap returns quotes in different formats
       // Handle both single asset and multiple asset responses
-      let quotes: any[] = []
+      let quotes: unknown[] = []
       
-      if (cmcData.data && Array.isArray(cmcData.data)) {
+      const data = cmcData as { data?: unknown[]; quotes?: unknown[] }
+      
+      if (data.data && Array.isArray(data.data)) {
         // Multiple quotes format
-        quotes = cmcData.data
-      } else if (cmcData.quotes && Array.isArray(cmcData.quotes)) {
+        quotes = data.data
+      } else if (data.quotes && Array.isArray(data.quotes)) {
         // Single asset format
-        quotes = cmcData.quotes
+        quotes = data.quotes
       } else if (Array.isArray(cmcData)) {
         quotes = cmcData
       }
 
-      return quotes.map((quote: any) => {
-        const timestamp = quote.timestamp || quote.last_updated
-        const price = quote.quote?.USD?.price || quote.price || 0
+      return quotes.map((quote: unknown) => {
+        const q = quote as { timestamp?: string; last_updated?: string; quote?: { USD?: { price?: number } }; price?: number }
+        const timestamp = q.timestamp || q.last_updated
+        const price = q.quote?.USD?.price || q.price || 0
         
         return {
-          timestamp,
+          timestamp: timestamp || new Date().toISOString(),
           price,
-          date: new Date(timestamp).toISOString().split('T')[0]
+          date: new Date(timestamp || new Date()).toISOString().split('T')[0]
         }
       }).filter(quote => quote.price > 0)
 

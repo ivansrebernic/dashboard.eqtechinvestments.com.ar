@@ -146,7 +146,7 @@ export class CoinMarketCapClient {
     count?: number
     interval?: '5m' | '10m' | '15m' | '30m' | '45m' | '1h' | '2h' | '3h' | '4h' | '6h' | '12h' | '1d' | '2d' | '3d' | '7d' | '14d' | '15d' | '30d' | '60d' | '90d' | '365d'
     convert?: string
-  }): Promise<any> {
+  }): Promise<unknown> {
     const queryParams: Record<string, string> = {
       symbol: params.symbol,
       convert: 'USD',
@@ -161,7 +161,7 @@ export class CoinMarketCapClient {
       }
     })
 
-    return this.makeRequest<any>('/cryptocurrency/quotes/historical', queryParams)
+    return this.makeRequest<unknown>('/cryptocurrency/quotes/historical', queryParams)
   }
 }
 

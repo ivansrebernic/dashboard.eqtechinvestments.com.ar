@@ -2,10 +2,10 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { publicPortfolioService } from '@/lib/portfolio/public-api-service'
-import { Portfolio, PortfolioPerformance, HoldingPerformance } from '@/types/portfolio'
+import { Portfolio, PortfolioPerformance } from '@/types/portfolio'
 import { HistoricalPortfolioData } from '@/lib/portfolio/historical-data-service'
 import { formatters } from '@/lib/coinmarketcap/services'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar } from 'recharts'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { TrendingUp, TrendingDown, Wallet, DollarSign, Activity, BarChart3, ChevronDown, Coins, Clock, Zap } from 'lucide-react'
 import { format, subDays } from 'date-fns'
 
@@ -271,7 +271,7 @@ export function PortfolioDashboard() {
               {isDropdownOpen && (
                 <div className="absolute top-full mt-3 w-80 bg-eqtech-surface/90 backdrop-blur-xl border border-eqtech-gray-medium/30 rounded-2xl shadow-2xl z-50">
                   <div className="p-2">
-                    {portfolios.map((portfolio, index) => (
+                    {portfolios.map((portfolio) => (
                       <button
                         key={portfolio.id}
                         onClick={() => handlePortfolioSelection(portfolio.id)}

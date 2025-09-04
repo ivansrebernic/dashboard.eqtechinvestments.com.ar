@@ -42,12 +42,19 @@ export async function GET(
           if (cryptoData && cryptoData.quote.USD) {
             const currentPrice = cryptoData.quote.USD.price
             const holdingValue = holding.amount * currentPrice
+            const priceChangePercent24h = cryptoData.quote.USD.percent_change_24h || 0
+            const priceChange24h = (holdingValue * priceChangePercent24h) / 100
 
             holdingPerformances.push({
               symbol: holding.symbol,
               amount: holding.amount,
               currentPrice,
-              totalValue: holdingValue
+              totalValue: holdingValue,
+              priceChange24h,
+              priceChangePercent24h,
+              marketCap: cryptoData.quote.USD.market_cap,
+              volume24h: cryptoData.quote.USD.volume_24h,
+              portfolioWeight: 0 // Will be calculated after all holdings are processed
             })
 
             totalValue += holdingValue
@@ -59,14 +66,35 @@ export async function GET(
             symbol: holding.symbol,
             amount: holding.amount,
             currentPrice: 0,
-            totalValue: 0
+            totalValue: 0,
+            priceChange24h: 0,
+            priceChangePercent24h: 0,
+            portfolioWeight: 0
           })
         }
       }
 
+      // Calculate portfolio weights
+      const holdingsWithWeights = holdingPerformances.map(holding => ({
+        ...holding,
+        portfolioWeight: totalValue > 0 ? (holding.totalValue / totalValue) * 100 : 0
+      }))
+
+      // Calculate total changes
+      const totalChange24h = holdingsWithWeights.reduce((sum, holding) => sum + holding.priceChange24h, 0)
+      const totalChangePercent24h = totalValue > 0 ? (totalChange24h / (totalValue - totalChange24h)) * 100 : 0
+
       const performance: PortfolioPerformance = {
         totalValue,
-        holdings: holdingPerformances
+        totalChange24h,
+        totalChangePercent24h,
+        holdings: holdingsWithWeights,
+        metrics: {
+          assetCount: holdingsWithWeights.length,
+          topPerformer: null,
+          worstPerformer: null,
+          lastUpdated: new Date().toISOString()
+        }
       }
 
       return NextResponse.json({ performance })

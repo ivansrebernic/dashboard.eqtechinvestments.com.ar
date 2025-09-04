@@ -1,13 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { ShieldX, Home, ArrowLeft } from 'lucide-react'
 import { useUserRole } from '@/lib/roles/hooks'
 
-export default function UnauthorizedPage() {
+function UnauthorizedContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { role, loading } = useUserRole()
@@ -89,5 +89,17 @@ export default function UnauthorizedPage() {
         </CardFooter>
       </Card>
     </div>
+  )
+}
+
+export default function UnauthorizedPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-eqtech-dark">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-eqtech-gold"></div>
+      </div>
+    }>
+      <UnauthorizedContent />
+    </Suspense>
   )
 }

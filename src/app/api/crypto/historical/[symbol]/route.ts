@@ -3,10 +3,10 @@ import { getCoinMarketCapClient } from '@/lib/coinmarketcap/client'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { symbol: string } }
+  { params }: { params: Promise<{ symbol: string }> }
 ) {
   try {
-    const { symbol } = params
+    const { symbol } = await params
     const { searchParams } = new URL(request.url)
     
     const count = searchParams.get('count') || '30'
@@ -23,7 +23,7 @@ export async function GET(
     const data = await client.getHistoricalQuotes({
       symbol: symbol.toUpperCase(),
       count: parseInt(count),
-      interval: interval as any
+      interval: interval as '5m' | '10m' | '15m' | '30m' | '45m' | '1h' | '2h' | '3h' | '4h' | '6h' | '12h' | '1d' | '2d' | '3d' | '7d' | '14d' | '15d' | '30d' | '60d' | '90d' | '365d'
     })
 
     return NextResponse.json({

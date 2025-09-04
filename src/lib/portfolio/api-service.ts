@@ -115,7 +115,15 @@ export class ApiPortfolioService {
     if (portfolio.holdings.length === 0) {
       return {
         totalValue: 0,
-        holdings: []
+        totalChange24h: 0,
+        totalChangePercent24h: 0,
+        holdings: [],
+        metrics: {
+          assetCount: 0,
+          topPerformer: null,
+          worstPerformer: null,
+          lastUpdated: new Date().toISOString()
+        }
       }
     }
 
@@ -133,18 +141,28 @@ export class ApiPortfolioService {
                 symbol: holding.symbol,
                 amount: holding.amount,
                 currentPrice: 0,
-                totalValue: 0
+                totalValue: 0,
+                priceChange24h: 0,
+                priceChangePercent24h: 0,
+                portfolioWeight: 0
               }
             }
 
             const currentPrice = crypto.quote.USD.price
             const currentValue = holding.amount * currentPrice
+            const priceChangePercent24h = crypto.quote.USD.percent_change_24h || 0
+            const priceChange24h = (currentValue * priceChangePercent24h) / 100
 
             return {
               symbol: holding.symbol,
               amount: holding.amount,
               currentPrice,
-              totalValue: currentValue
+              totalValue: currentValue,
+              priceChange24h,
+              priceChangePercent24h,
+              marketCap: crypto.quote.USD.market_cap,
+              volume24h: crypto.quote.USD.volume_24h,
+              portfolioWeight: 0 // Will be calculated later
             }
           } catch (error) {
             console.error(`Error getting price for ${holding.symbol}:`, error)
@@ -152,7 +170,10 @@ export class ApiPortfolioService {
               symbol: holding.symbol,
               amount: holding.amount,
               currentPrice: 0,
-              totalValue: 0
+              totalValue: 0,
+              priceChange24h: 0,
+              priceChangePercent24h: 0,
+              portfolioWeight: 0
             }
           }
         })
@@ -163,20 +184,52 @@ export class ApiPortfolioService {
         0
       )
 
+      const totalChange24h = holdingPerformances.reduce(
+        (sum, holding) => sum + holding.priceChange24h,
+        0
+      )
+
+      const totalChangePercent24h = totalValue > 0 ? (totalChange24h / (totalValue - totalChange24h)) * 100 : 0
+
+      // Calculate portfolio weights
+      const holdingsWithWeights = holdingPerformances.map(holding => ({
+        ...holding,
+        portfolioWeight: totalValue > 0 ? (holding.totalValue / totalValue) * 100 : 0
+      }))
+
       return {
         totalValue,
-        holdings: holdingPerformances
+        totalChange24h,
+        totalChangePercent24h,
+        holdings: holdingsWithWeights,
+        metrics: {
+          assetCount: holdingsWithWeights.length,
+          topPerformer: null,
+          worstPerformer: null,
+          lastUpdated: new Date().toISOString()
+        }
       }
     } catch (error) {
       console.error('Error calculating portfolio performance:', error)
       return {
         totalValue: 0,
+        totalChange24h: 0,
+        totalChangePercent24h: 0,
         holdings: portfolio.holdings.map(holding => ({
           symbol: holding.symbol,
           amount: holding.amount,
           currentPrice: 0,
-          totalValue: 0
-        }))
+          totalValue: 0,
+          priceChange24h: 0,
+          priceChangePercent24h: 0,
+          portfolioWeight: 0
+        })),
+        metrics: {
+          assetCount: portfolio.holdings.length,
+          topPerformer: null,
+          worstPerformer: null,
+          lastUpdated: new Date().toISOString()
+        }
       }
     }
   }

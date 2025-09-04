@@ -149,7 +149,7 @@ export class PublicPortfolioService {
   /**
    * Create empty holding performance object
    */
-  private createEmptyHolding(holding: any): HoldingPerformance {
+  private createEmptyHolding(holding: { symbol: string; amount: number }): HoldingPerformance {
     return {
       symbol: holding.symbol,
       amount: holding.amount,
