@@ -59,16 +59,16 @@ export default function UsersPage() {
 
   return (
     <AdminGuard>
-      <div className="min-h-screen bg-background flex">
+      <div className="min-h-screen bg-eqtech-dark flex">
         <NavMenu />
         
-        <main className="flex-1 p-4">
-          <div className="max-w-7xl mx-auto space-y-6">
+        <main className="flex-1 p-6">
+          <div className="max-w-7xl mx-auto space-y-8">
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
-                <h1 className="text-3xl font-bold">User Management</h1>
-                <p className="text-muted-foreground mt-1">
+                <h1 className="text-4xl font-bold text-eqtech-light font-montserrat">User Management</h1>
+                <p className="text-eqtech-gold mt-2 font-roboto-flex text-lg">
                   Manage user accounts and role assignments
                 </p>
               </div>
@@ -79,6 +79,7 @@ export default function UsersPage() {
                   variant="outline"
                   size="sm"
                   disabled={isLoading}
+                  className="border-eqtech-gray-medium text-eqtech-light hover:bg-eqtech-gray-medium font-montserrat"
                 >
                   <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
                   Refresh
@@ -87,42 +88,42 @@ export default function UsersPage() {
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card className="bg-eqtech-gray-dark border-eqtech-gray-medium">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Total Users</p>
-                      <p className="text-2xl font-bold">{totalUsers}</p>
+                      <p className="text-sm font-medium text-eqtech-gray-light font-roboto-flex">Total Users</p>
+                      <p className="text-2xl font-bold text-eqtech-light font-montserrat">{totalUsers}</p>
                     </div>
-                    <Users className="h-8 w-8 text-muted-foreground" />
+                    <Users className="h-8 w-8 text-eqtech-gold" />
                   </div>
                 </CardContent>
               </Card>
               
-              <Card>
+              <Card className="bg-eqtech-gray-dark border-eqtech-gray-medium">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Admin Users</p>
-                      <p className="text-2xl font-bold text-red-600">{adminUsers}</p>
+                      <p className="text-sm font-medium text-eqtech-gray-light font-roboto-flex">Admin Users</p>
+                      <p className="text-2xl font-bold text-eqtech-gold font-montserrat">{adminUsers}</p>
                     </div>
-                    <div className="w-8 h-8 bg-red-100 dark:bg-red-950 rounded-full flex items-center justify-center">
-                      <span className="text-red-600 font-bold text-sm">A</span>
+                    <div className="w-8 h-8 bg-eqtech-gold/20 rounded-full flex items-center justify-center">
+                      <span className="text-eqtech-gold font-bold text-sm">A</span>
                     </div>
                   </div>
                 </CardContent>
               </Card>
               
-              <Card>
+              <Card className="bg-eqtech-gray-dark border-eqtech-gray-medium">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Basic Users</p>
-                      <p className="text-2xl font-bold text-blue-600">{basicUsers}</p>
+                      <p className="text-sm font-medium text-eqtech-gray-light font-roboto-flex">Basic Users</p>
+                      <p className="text-2xl font-bold text-eqtech-light font-montserrat">{basicUsers}</p>
                     </div>
-                    <div className="w-8 h-8 bg-blue-100 dark:bg-blue-950 rounded-full flex items-center justify-center">
-                      <span className="text-blue-600 font-bold text-sm">B</span>
+                    <div className="w-8 h-8 bg-eqtech-gray-medium rounded-full flex items-center justify-center">
+                      <span className="text-eqtech-light font-bold text-sm">B</span>
                     </div>
                   </div>
                 </CardContent>
@@ -130,22 +131,22 @@ export default function UsersPage() {
             </div>
 
             {/* Search and Filters */}
-            <Card>
+            <Card className="bg-eqtech-gray-dark border-eqtech-gray-medium">
               <CardHeader>
-                <CardTitle>Search Users</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-eqtech-light font-montserrat">Search Users</CardTitle>
+                <CardDescription className="text-eqtech-gray-light font-roboto-flex">
                   Search by email, username, or role
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex gap-4">
                   <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-eqtech-gold" />
                     <Input
                       placeholder="Search users..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
+                      className="pl-10 bg-eqtech-dark border-eqtech-gray-medium text-eqtech-light font-roboto-flex"
                     />
                   </div>
                 </div>
@@ -153,17 +154,17 @@ export default function UsersPage() {
             </Card>
 
             {/* Users Table */}
-            <Card>
+            <Card className="bg-eqtech-gray-dark border-eqtech-gray-medium">
               <CardHeader>
-                <CardTitle>Users ({filteredUsers.length})</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-eqtech-light font-montserrat">Users ({filteredUsers.length})</CardTitle>
+                <CardDescription className="text-eqtech-gray-light font-roboto-flex">
                   Manage user roles and permissions
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 {error && (
-                  <div className="mb-4 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
-                    <p className="text-destructive text-sm">{error}</p>
+                  <div className="mb-4 p-4 bg-red-900/20 border border-red-800/30 rounded-lg">
+                    <p className="text-red-400 text-sm font-roboto-flex">{error}</p>
                   </div>
                 )}
                 

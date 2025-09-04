@@ -129,7 +129,8 @@ export async function checkUserRole(requiredRole: UserRole): Promise<boolean> {
     }
 
     const serverRoleService = createServerRoleService();
-    return await serverRoleService.userHasRole(user.id, requiredRole);
+    const userRole = await serverRoleService.getUserRole(user.id);
+    return userRole === requiredRole;
   } catch (error) {
     console.error('Error checking user role:', error);
     return false;

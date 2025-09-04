@@ -10,15 +10,15 @@ export default async function DashboardPage() {
   const user = await getUser()
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-eqtech-dark flex">
       <NavMenu />
       
-      <main className="flex-1 p-4">
-        <div className="max-w-7xl mx-auto space-y-6">
+      <main className="flex-1 p-6">
+        <div className="max-w-7xl mx-auto space-y-8">
           <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold">Crypto Dashboard</h1>
+            <h1 className="text-4xl font-bold text-eqtech-light font-montserrat">Crypto Dashboard</h1>
             <form action={logout}>
-              <Button variant="outline">Logout</Button>
+              <Button variant="outline" className="border-eqtech-gray-medium text-eqtech-light hover:bg-eqtech-gray-medium font-montserrat">Logout</Button>
             </form>
           </div>
 

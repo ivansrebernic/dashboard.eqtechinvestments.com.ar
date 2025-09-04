@@ -118,9 +118,9 @@ export function CryptoSearch({ onSelect, placeholder = "Search cryptocurrencies.
     <div ref={searchRef} className={cn("relative w-full", className)}>
       {/* Selected crypto display */}
       {selectedCrypto && (
-        <div className="flex items-center gap-3 p-3 border rounded-md bg-background">
+        <div className="flex items-center gap-3 p-3 border border-eqtech-gray-medium rounded-md bg-eqtech-dark">
           <div className="flex items-center gap-2 flex-1">
-            <div className="w-6 h-6 rounded-full overflow-hidden bg-muted flex items-center justify-center">
+            <div className="w-6 h-6 rounded-full overflow-hidden bg-eqtech-gray-medium flex items-center justify-center">
               <img
                 src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${selectedCrypto.id}.png`}
                 alt={`${selectedCrypto.name} logo`}
@@ -131,13 +131,13 @@ export function CryptoSearch({ onSelect, placeholder = "Search cryptocurrencies.
                   e.currentTarget.nextElementSibling?.classList.remove('hidden')
                 }}
               />
-              <span className="hidden text-xs font-bold text-primary">
+              <span className="hidden text-xs font-bold text-eqtech-gold">
                 {selectedCrypto.symbol.charAt(0)}
               </span>
             </div>
             <div>
-              <p className="font-medium text-sm">{selectedCrypto.name}</p>
-              <p className="text-xs text-muted-foreground">
+              <p className="font-medium text-sm text-eqtech-light font-montserrat">{selectedCrypto.name}</p>
+              <p className="text-xs text-eqtech-gray-light font-roboto-flex">
                 {selectedCrypto.symbol} • {formatters.currency(selectedCrypto.quote.USD.price)}
               </p>
             </div>
@@ -156,7 +156,7 @@ export function CryptoSearch({ onSelect, placeholder = "Search cryptocurrencies.
       {/* Search input */}
       {!selectedCrypto && (
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-eqtech-gold" />
           <Input
             ref={inputRef}
             type="text"
@@ -164,12 +164,12 @@ export function CryptoSearch({ onSelect, placeholder = "Search cryptocurrencies.
             onChange={(e) => setQuery(e.target.value)}
             onFocus={handleInputFocus}
             placeholder={placeholder}
-            className="pl-10"
+            className="pl-10 bg-eqtech-dark border-eqtech-gray-medium text-eqtech-light font-roboto-flex"
             disabled={disabled}
           />
           {loading && (
             <div className="absolute right-3 top-1/2 -translate-y-1/2">
-              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              <Loader2 className="h-4 w-4 animate-spin text-eqtech-gold" />
             </div>
           )}
         </div>
@@ -178,21 +178,21 @@ export function CryptoSearch({ onSelect, placeholder = "Search cryptocurrencies.
       {/* Dropdown results */}
       {isOpen && !selectedCrypto && (
         <div className="absolute top-full left-0 right-0 z-50 mt-1">
-          <Card>
+          <Card className="bg-eqtech-gray-dark border-eqtech-gray-medium">
             <CardContent className="p-0">
               {loading && results.length === 0 ? (
-                <div className="p-4 text-center text-sm text-muted-foreground">
-                  <Loader2 className="h-4 w-4 animate-spin mx-auto mb-2" />
+                <div className="p-4 text-center text-sm text-eqtech-gray-light font-roboto-flex">
+                  <Loader2 className="h-4 w-4 animate-spin mx-auto mb-2 text-eqtech-gold" />
                   Searching...
                 </div>
               ) : results.length === 0 ? (
-                <div className="p-4 text-center text-sm text-muted-foreground">
+                <div className="p-4 text-center text-sm text-eqtech-gray-light font-roboto-flex">
                   {query.trim() ? `No results for "${query}"` : 'Start typing to search cryptocurrencies'}
                 </div>
               ) : (
                 <div className="max-h-64 overflow-y-auto">
                   {!query.trim() && (
-                    <div className="p-2 text-xs text-muted-foreground font-medium border-b">
+                    <div className="p-2 text-xs text-eqtech-gold font-medium border-b border-eqtech-gray-medium font-montserrat">
                       Popular Cryptocurrencies
                     </div>
                   )}
@@ -200,10 +200,10 @@ export function CryptoSearch({ onSelect, placeholder = "Search cryptocurrencies.
                     <button
                       key={crypto.id}
                       onClick={() => handleSelect(crypto)}
-                      className="w-full p-3 text-left hover:bg-muted transition-colors border-b last:border-b-0"
+                      className="w-full p-3 text-left hover:bg-eqtech-dark transition-colors border-b border-eqtech-gray-medium last:border-b-0"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full overflow-hidden bg-muted flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-full overflow-hidden bg-eqtech-gray-medium flex items-center justify-center">
                           <img
                             src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${crypto.id}.png`}
                             alt={`${crypto.name} logo`}
@@ -214,18 +214,18 @@ export function CryptoSearch({ onSelect, placeholder = "Search cryptocurrencies.
                               e.currentTarget.nextElementSibling?.classList.remove('hidden')
                             }}
                           />
-                          <span className="hidden text-sm font-bold text-primary">
+                          <span className="hidden text-sm font-bold text-eqtech-gold">
                             {crypto.symbol.charAt(0)}
                           </span>
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <p className="font-medium text-sm truncate">{crypto.name}</p>
-                            <Badge variant="secondary" className="text-xs">
+                            <p className="font-medium text-sm truncate text-eqtech-light font-montserrat">{crypto.name}</p>
+                            <Badge variant="outline" className="text-xs border-eqtech-gold text-eqtech-gold">
                               {crypto.symbol}
                             </Badge>
                           </div>
-                          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                          <div className="flex items-center gap-3 text-xs text-eqtech-gray-light font-roboto-flex">
                             <span>{formatters.currency(crypto.quote.USD.price)}</span>
                             <span className={cn(
                               "flex items-center",
@@ -236,7 +236,7 @@ export function CryptoSearch({ onSelect, placeholder = "Search cryptocurrencies.
                             </span>
                           </div>
                         </div>
-                        <div className="text-right text-xs text-muted-foreground">
+                        <div className="text-right text-xs text-eqtech-gray-light font-roboto-flex">
                           <p>#{crypto.cmc_rank}</p>
                         </div>
                       </div>

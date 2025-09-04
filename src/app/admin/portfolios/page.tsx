@@ -139,33 +139,34 @@ export default function PortfoliosPage() {
 
   return (
     <AdminGuard>
-      <div className="min-h-screen bg-background flex">
+      <div className="min-h-screen bg-eqtech-dark flex">
         <NavMenu />
         
-        <main className="flex-1 p-4">
-          <div className="max-w-7xl mx-auto space-y-6">
+        <main className="flex-1 p-6">
+          <div className="max-w-7xl mx-auto space-y-8">
             {/* Header */}
             <div className="flex justify-between items-center">
               <div>
-                <h1 className="text-3xl font-bold">Portfolio Management</h1>
-                <p className="text-muted-foreground mt-1">
+                <h1 className="text-4xl font-bold text-eqtech-light font-montserrat">Portfolio Management</h1>
+                <p className="text-eqtech-gold mt-2 font-roboto-flex text-lg">
                   Create and manage cryptocurrency portfolios
                 </p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Portfolio List */}
-              <Card>
+              <Card className="bg-eqtech-gray-dark border-eqtech-gray-medium">
                 <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
+                  <CardTitle className="flex items-center justify-between text-eqtech-light font-montserrat">
                     <span className="flex items-center gap-2">
-                      <Wallet className="h-5 w-5" />
+                      <Wallet className="h-5 w-5 text-eqtech-gold" />
                       Portfolios
                     </span>
                     <Button
                       size="sm"
                       onClick={() => setShowCreateForm(!showCreateForm)}
+                      className="bg-eqtech-gold text-eqtech-dark hover:bg-eqtech-dark-gold font-montserrat font-medium"
                     >
                       <Plus className="h-4 w-4 mr-2" />
                       New Portfolio
@@ -175,32 +176,34 @@ export default function PortfoliosPage() {
                 <CardContent className="space-y-4">
                   {/* Create Portfolio Form */}
                   {showCreateForm && (
-                    <Card>
-                      <CardContent className="p-4">
+                    <Card className="bg-eqtech-gray-dark border-eqtech-gray-medium">
+                      <CardContent className="p-4 text-eqtech-light">
                         <form onSubmit={handleCreatePortfolio} className="space-y-4">
                           <div>
-                            <Label htmlFor="name">Portfolio Name</Label>
+                            <Label htmlFor="name" className="text-eqtech-gold font-roboto-flex">Portfolio Name</Label>
                             <Input
                               id="name"
                               value={createData.name}
                               onChange={(e) => setCreateData(prev => ({ ...prev, name: e.target.value }))}
                               placeholder="My Portfolio"
                               required
+                              className="bg-eqtech-dark border-eqtech-gray-medium text-eqtech-light font-roboto-flex"
                             />
                           </div>
                           <div>
-                            <Label htmlFor="description">Description (Optional)</Label>
+                            <Label htmlFor="description" className="text-eqtech-gold font-roboto-flex">Description (Optional)</Label>
                             <Textarea
                               id="description"
                               value={createData.description || ''}
                               onChange={(e) => setCreateData(prev => ({ ...prev, description: e.target.value }))}
                               placeholder="Portfolio description"
                               rows={3}
+                              className="bg-eqtech-dark border-eqtech-gray-medium text-eqtech-light font-roboto-flex"
                             />
                           </div>
                           <div className="flex gap-2">
-                            <Button type="submit" size="sm">Create</Button>
-                            <Button type="button" variant="outline" size="sm" onClick={() => setShowCreateForm(false)}>
+                            <Button type="submit" size="sm" className="bg-eqtech-gold text-eqtech-dark hover:bg-eqtech-dark-gold font-montserrat font-medium">Create</Button>
+                            <Button type="button" variant="outline" size="sm" onClick={() => setShowCreateForm(false)} className="border-eqtech-gray-medium text-eqtech-light hover:bg-eqtech-gray-medium font-montserrat">
                               Cancel
                             </Button>
                           </div>
@@ -211,7 +214,7 @@ export default function PortfoliosPage() {
 
                   {/* Portfolio List */}
                   {portfolios.length === 0 ? (
-                    <p className="text-muted-foreground text-center py-8">
+                    <p className="text-eqtech-gray-light text-center py-8 font-roboto-flex">
                       No portfolios yet. Create your first portfolio to get started.
                     </p>
                   ) : (
@@ -219,19 +222,19 @@ export default function PortfoliosPage() {
                       {portfolios.map((portfolio) => (
                         <Card 
                           key={portfolio.id}
-                          className={`cursor-pointer transition-colors ${
-                            selectedPortfolio?.id === portfolio.id ? 'bg-muted' : ''
+                          className={`cursor-pointer transition-colors bg-eqtech-dark border-eqtech-gray-medium hover:border-eqtech-gold ${
+                            selectedPortfolio?.id === portfolio.id ? 'bg-eqtech-gray-medium border-eqtech-gold' : ''
                           }`}
                           onClick={() => setSelectedPortfolio(portfolio)}
                         >
                           <CardContent className="p-4">
                             <div className="flex justify-between items-start">
                               <div className="flex-1">
-                                <h3 className="font-semibold">{portfolio.name}</h3>
+                                <h3 className="font-semibold text-eqtech-light font-montserrat">{portfolio.name}</h3>
                                 {portfolio.description && (
-                                  <p className="text-sm text-muted-foreground">{portfolio.description}</p>
+                                  <p className="text-sm text-eqtech-gray-light font-roboto-flex">{portfolio.description}</p>
                                 )}
-                                <p className="text-xs text-muted-foreground mt-1">
+                                <p className="text-xs text-eqtech-gray-light mt-1 font-roboto-flex">
                                   {portfolio.holdings.length} holdings • Created {new Date(portfolio.createdAt).toLocaleDateString()}
                                 </p>
                               </div>
@@ -242,6 +245,7 @@ export default function PortfoliosPage() {
                                   e.stopPropagation()
                                   handleDeletePortfolio(portfolio.id)
                                 }}
+                                className="text-eqtech-gray-light hover:text-red-400 hover:bg-red-900/20"
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
@@ -255,21 +259,21 @@ export default function PortfoliosPage() {
               </Card>
 
               {/* Portfolio Details */}
-              <Card>
+              <Card className="bg-eqtech-gray-dark border-eqtech-gray-medium">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5" />
+                  <CardTitle className="flex items-center gap-2 text-eqtech-light font-montserrat">
+                    <TrendingUp className="h-5 w-5 text-eqtech-gold" />
                     {selectedPortfolio ? selectedPortfolio.name : 'Portfolio Details'}
                   </CardTitle>
                   {selectedPortfolio && (
-                    <CardDescription>
+                    <CardDescription className="text-eqtech-gray-light font-roboto-flex">
                       {selectedPortfolio.description || 'No description'}
                     </CardDescription>
                   )}
                 </CardHeader>
                 <CardContent>
                   {!selectedPortfolio ? (
-                    <p className="text-muted-foreground text-center py-8">
+                    <p className="text-eqtech-gray-light text-center py-8 font-roboto-flex">
                       Select a portfolio to view details and performance
                     </p>
                   ) : (
@@ -277,45 +281,45 @@ export default function PortfoliosPage() {
                       {/* Performance Summary */}
                       {loading ? (
                         <div className="text-center py-4">
-                          <p className="text-muted-foreground">Loading performance data...</p>
+                          <p className="text-eqtech-gray-light font-roboto-flex">Loading performance data...</p>
                         </div>
                       ) : performance && performance.holdings.length > 0 ? (
-                        <Card>
+                        <Card className="bg-eqtech-dark border-eqtech-gold">
                           <CardContent className="p-4">
                             <div className="text-center">
-                              <p className="text-sm text-muted-foreground">Total Portfolio Value</p>
-                              <p className="text-2xl font-bold text-green-600">
+                              <p className="text-sm text-eqtech-gold font-roboto-flex font-serif-text">Total Portfolio Value</p>
+                              <p className="text-3xl font-bold text-eqtech-gold font-dm-serif">
                                 {formatters.currency(performance.totalValue)}
                               </p>
                             </div>
                           </CardContent>
                         </Card>
                       ) : (
-                        <p className="text-muted-foreground text-center">
+                        <p className="text-eqtech-gray-light text-center font-roboto-flex">
                           Add holdings to see performance data
                         </p>
                       )}
 
                       {/* Add Holding Form */}
                       {showAddHolding && (
-                        <Card>
-                          <CardContent className="p-4">
+                        <Card className="bg-eqtech-gray-dark border-eqtech-gray-medium">
+                          <CardContent className="p-4 text-eqtech-light">
                             <form onSubmit={handleAddHolding} className="space-y-4">
                               <div className="space-y-4">
                                 <div>
-                                  <Label>Select Cryptocurrency</Label>
+                                  <Label className="text-eqtech-gold font-roboto-flex">Select Cryptocurrency</Label>
                                   <CryptoSearch
                                     onSelect={handleCryptoSelect}
                                     placeholder="Search for cryptocurrency..."
                                   />
                                   {selectedCrypto && (
-                                    <p className="text-xs text-muted-foreground mt-1">
+                                    <p className="text-xs text-eqtech-gray-light font-roboto-flex mt-1">
                                       Selected: {selectedCrypto.name} ({selectedCrypto.symbol}) - {formatters.currency(selectedCrypto.quote.USD.price)}
                                     </p>
                                   )}
                                 </div>
                                 <div>
-                                  <Label htmlFor="amount">Amount</Label>
+                                  <Label htmlFor="amount" className="text-eqtech-gold font-roboto-flex">Amount</Label>
                                   <Input
                                     id="amount"
                                     type="number"
@@ -324,18 +328,19 @@ export default function PortfoliosPage() {
                                     value={holdingAmount || ''}
                                     onChange={(e) => setHoldingAmount(parseFloat(e.target.value) || 0)}
                                     placeholder="0.1"
+                                    className="bg-eqtech-dark border-eqtech-gray-medium text-eqtech-light font-roboto-flex"
                                     required
                                     disabled={!selectedCrypto}
                                   />
                                   {selectedCrypto && holdingAmount > 0 && (
-                                    <p className="text-xs text-muted-foreground mt-1">
+                                    <p className="text-xs text-eqtech-gray-light font-roboto-flex mt-1">
                                       Estimated value: {formatters.currency(holdingAmount * selectedCrypto.quote.USD.price)}
                                     </p>
                                   )}
                                 </div>
                               </div>
                               <div className="flex gap-2">
-                                <Button type="submit" size="sm" disabled={!selectedCrypto || holdingAmount <= 0}>
+                                <Button type="submit" size="sm" disabled={!selectedCrypto || holdingAmount <= 0} className="bg-eqtech-gold text-eqtech-dark hover:bg-eqtech-dark-gold font-montserrat font-medium">
                                   Add Holding
                                 </Button>
                                 <Button 
@@ -347,6 +352,7 @@ export default function PortfoliosPage() {
                                     setSelectedCrypto(null)
                                     setHoldingAmount(0)
                                   }}
+                                  className="border-eqtech-gray-medium text-eqtech-light hover:bg-eqtech-gray-medium font-montserrat"
                                 >
                                   Cancel
                                 </Button>
@@ -359,11 +365,12 @@ export default function PortfoliosPage() {
                       {/* Holdings List */}
                       <div className="space-y-4">
                         <div className="flex justify-between items-center">
-                          <h4 className="font-semibold">Holdings</h4>
+                          <h4 className="font-semibold text-eqtech-light font-montserrat">Holdings</h4>
                           <Button 
                             size="sm" 
                             onClick={() => setShowAddHolding(!showAddHolding)}
                             disabled={showAddHolding}
+                            className="bg-eqtech-gold text-eqtech-dark hover:bg-eqtech-dark-gold font-montserrat font-medium"
                           >
                             <Plus className="h-4 w-4 mr-2" />
                             Add Holding
@@ -371,7 +378,7 @@ export default function PortfoliosPage() {
                         </div>
 
                         {selectedPortfolio.holdings.length === 0 ? (
-                          <p className="text-muted-foreground text-center py-4">
+                          <p className="text-eqtech-gray-light font-roboto-flex text-center py-4">
                             No holdings yet. Add some cryptocurrencies to track performance.
                           </p>
                         ) : (
@@ -379,20 +386,20 @@ export default function PortfoliosPage() {
                             {selectedPortfolio.holdings.map((holding) => {
                               const holdingPerf = performance?.holdings.find(h => h.symbol === holding.symbol)
                               return (
-                                <Card key={holding.id}>
+                                <Card key={holding.id} className="bg-eqtech-gray-dark border-eqtech-gray-medium">
                                   <CardContent className="p-4">
                                     <div className="flex justify-between items-start">
                                       <div>
-                                        <h5 className="font-semibold">{holding.symbol}</h5>
-                                        <p className="text-sm text-muted-foreground">
+                                        <h5 className="font-semibold text-eqtech-light font-montserrat">{holding.symbol}</h5>
+                                        <p className="text-sm text-eqtech-gray-light font-roboto-flex">
                                           Amount: {formatters.number(holding.amount)}
                                         </p>
                                         {holdingPerf && (
                                           <div className="mt-2 space-y-1">
-                                            <p className="text-sm">
+                                            <p className="text-sm text-eqtech-light font-roboto-flex">
                                               Price: {formatters.currency(holdingPerf.currentPrice)}
                                             </p>
-                                            <p className="text-sm font-semibold text-green-600">
+                                            <p className="text-sm font-semibold text-green-400 font-roboto-flex">
                                               Value: {formatters.currency(holdingPerf.totalValue)}
                                             </p>
                                           </div>
@@ -402,6 +409,7 @@ export default function PortfoliosPage() {
                                         size="sm"
                                         variant="ghost"
                                         onClick={() => handleRemoveHolding(holding.id)}
+                                        className="text-eqtech-gray-light hover:text-red-400 hover:bg-red-900/20"
                                       >
                                         <Trash2 className="h-4 w-4" />
                                       </Button>

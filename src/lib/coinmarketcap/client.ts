@@ -52,22 +52,25 @@ export class CoinMarketCapClient {
     cryptocurrency_type?: 'all' | 'coins' | 'tokens'
     tag?: string
   }): Promise<CryptoListingsResponse> {
-    const queryParams: Record<string, string> = {
+    const baseParams = {
       start: '1',
       limit: '100',
       convert: 'USD',
       sort: 'market_cap',
       sort_dir: 'desc',
-      cryptocurrency_type: 'all',
-      ...params
+      cryptocurrency_type: 'all'
     }
-
-    // Convert numeric values to strings
-    Object.entries(queryParams).forEach(([key, value]) => {
-      if (typeof value === 'number') {
-        queryParams[key] = value.toString()
-      }
-    })
+    
+    const queryParams: Record<string, string> = { ...baseParams }
+    
+    // Override with provided params, converting to strings
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined) {
+          queryParams[key] = value.toString()
+        }
+      })
+    }
 
     return this.makeRequest<CryptoListingsResponse>('/cryptocurrency/listings/latest', queryParams)
   }
@@ -120,13 +123,12 @@ export class CoinMarketCapClient {
   }): Promise<PriceConversionResponse> {
     const queryParams: Record<string, string> = {
       amount: params.amount.toString(),
-      convert: 'USD',
-      ...params
+      convert: 'USD'
     }
-
-    // Convert numeric values to strings
-    Object.entries(queryParams).forEach(([key, value]) => {
-      if (typeof value === 'number') {
+    
+    // Add other params, converting to strings
+    Object.entries(params).forEach(([key, value]) => {
+      if (key !== 'amount' && value !== undefined) {
         queryParams[key] = value.toString()
       }
     })
