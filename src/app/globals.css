@@ -57,7 +57,7 @@
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
-  --eqtech-dark: oklch(0.059 0 0); /* #0f0f0f */
+  --eqtech-dark: #0f1419; /* Darker navy blue */
   --eqtech-light: oklch(1 0 0); /* #ffffff */
   --eqtech-gold: oklch(0.74 0.089 74.37); /* #c9b06e */
   --eqtech-dark-gold: oklch(0.6 0.089 74.37); /* #a18a54 */
@@ -101,7 +101,7 @@
   --foreground: var(--eqtech-light);
   --card: var(--eqtech-gray-dark);
   --card-foreground: var(--eqtech-light);
-  --eqtech-dark: oklch(0.059 0 0); /* #0f0f0f */
+  --eqtech-dark: #0f1419; /* Darker navy blue */
   --eqtech-light: oklch(1 0 0); /* #ffffff */
   --eqtech-gold: oklch(0.74 0.089 74.37); /* #c9b06e */
   --eqtech-dark-gold: oklch(0.6 0.089 74.37); /* #a18a54 */
