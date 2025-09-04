@@ -8,6 +8,7 @@ import { formatters } from '@/lib/coinmarketcap/services'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { TrendingUp, TrendingDown, Wallet, DollarSign, Activity, BarChart3, ChevronDown, Coins, Clock, Zap } from 'lucide-react'
 import { format, subDays } from 'date-fns'
+import { FearGreedIndex } from './fear-greed-index'
 
 interface PortfolioWithPerformance extends Portfolio {
   performance: PortfolioPerformance
@@ -319,6 +320,11 @@ export function PortfolioDashboard() {
               )}
             </div>
           )}
+        </div>
+
+        {/* Fear & Greed Index */}
+        <div className="mb-12">
+          <FearGreedIndex />
         </div>
 
         {/* Portfolio Analytics */}
