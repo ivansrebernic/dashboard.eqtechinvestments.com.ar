@@ -37,13 +37,35 @@ export interface DbPortfolioHolding {
 
 export interface PortfolioPerformance {
   totalValue: number
+  totalChange24h: number
+  totalChangePercent24h: number
   holdings: HoldingPerformance[]
+  metrics: PortfolioMetrics
 }
 
 export interface HoldingPerformance {
   symbol: string
   amount: number
   currentPrice: number
+  totalValue: number
+  priceChange24h: number
+  priceChangePercent24h: number
+  marketCap?: number
+  volume24h?: number
+  portfolioWeight: number
+}
+
+export interface PortfolioMetrics {
+  assetCount: number
+  topPerformer: AssetPerformance | null
+  worstPerformer: AssetPerformance | null
+  lastUpdated: string
+}
+
+export interface AssetPerformance {
+  symbol: string
+  changePercent: number
+  change24h: number
   totalValue: number
 }
 

@@ -4,6 +4,12 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  --color-eqtech-darker: var(--eqtech-darker);
+  --color-eqtech-gold-light: var(--eqtech-gold-light);
+  --color-eqtech-copper: var(--eqtech-copper);
+  --color-eqtech-gray-lighter: var(--eqtech-gray-lighter);
+  --color-eqtech-surface: var(--eqtech-surface);
+  --color-eqtech-surface-elevated: var(--eqtech-surface-elevated);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
@@ -54,16 +60,22 @@
 }
 
 :root {
-  --radius: 0.625rem;
+  --radius: 0.75rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
-  --eqtech-dark: #0f1419; /* Darker navy blue */
-  --eqtech-light: oklch(1 0 0); /* #ffffff */
-  --eqtech-gold: oklch(0.74 0.089 74.37); /* #c9b06e */
-  --eqtech-dark-gold: oklch(0.6 0.089 74.37); /* #a18a54 */
-  --eqtech-gray-dark: oklch(0.2 0 0); /* #333333 */
-  --eqtech-gray-medium: oklch(0.467 0 0); /* #777777 */
-  --eqtech-gray-light: oklch(0.667 0 0); /* #aaaaaa */
+  --eqtech-dark: #0a0e13; /* Deeper midnight */
+  --eqtech-darker: #060a0f; /* Ultra deep */
+  --eqtech-light: oklch(0.98 0 0); /* #fafafa */
+  --eqtech-gold: oklch(0.78 0.12 65); /* #d4af37 - True luxury gold */
+  --eqtech-gold-light: oklch(0.85 0.1 65); /* Lighter gold variant */
+  --eqtech-dark-gold: oklch(0.65 0.15 65); /* Deeper gold */
+  --eqtech-copper: oklch(0.7 0.15 45); /* Copper accent */
+  --eqtech-gray-dark: oklch(0.15 0 0); /* #262626 */
+  --eqtech-gray-medium: oklch(0.35 0 0); /* #595959 */
+  --eqtech-gray-light: oklch(0.65 0 0); /* #a6a6a6 */
+  --eqtech-gray-lighter: oklch(0.8 0 0); /* #cccccc */
+  --eqtech-surface: oklch(0.12 0 0); /* #1f1f1f */
+  --eqtech-surface-elevated: oklch(0.18 0 0); /* #2d2d2d */
   --font-roboto-flex: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
@@ -99,15 +111,21 @@
 .dark {
   --background: var(--eqtech-dark);
   --foreground: var(--eqtech-light);
-  --card: var(--eqtech-gray-dark);
+  --card: var(--eqtech-surface);
   --card-foreground: var(--eqtech-light);
-  --eqtech-dark: #0f1419; /* Darker navy blue */
-  --eqtech-light: oklch(1 0 0); /* #ffffff */
-  --eqtech-gold: oklch(0.74 0.089 74.37); /* #c9b06e */
-  --eqtech-dark-gold: oklch(0.6 0.089 74.37); /* #a18a54 */
-  --eqtech-gray-dark: oklch(0.2 0 0); /* #333333 */
-  --eqtech-gray-medium: oklch(0.467 0 0); /* #777777 */
-  --eqtech-gray-light: oklch(0.667 0 0); /* #aaaaaa */
+  --eqtech-dark: #0a0e13; /* Deeper midnight */
+  --eqtech-darker: #060a0f; /* Ultra deep */
+  --eqtech-light: oklch(0.98 0 0); /* #fafafa */
+  --eqtech-gold: oklch(0.78 0.12 65); /* #d4af37 - True luxury gold */
+  --eqtech-gold-light: oklch(0.85 0.1 65); /* Lighter gold variant */
+  --eqtech-dark-gold: oklch(0.65 0.15 65); /* Deeper gold */
+  --eqtech-copper: oklch(0.7 0.15 45); /* Copper accent */
+  --eqtech-gray-dark: oklch(0.15 0 0); /* #262626 */
+  --eqtech-gray-medium: oklch(0.35 0 0); /* #595959 */
+  --eqtech-gray-light: oklch(0.65 0 0); /* #a6a6a6 */
+  --eqtech-gray-lighter: oklch(0.8 0 0); /* #cccccc */
+  --eqtech-surface: oklch(0.12 0 0); /* #1f1f1f */
+  --eqtech-surface-elevated: oklch(0.18 0 0); /* #2d2d2d */
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
   --primary: var(--eqtech-gold);

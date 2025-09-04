@@ -1,11 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { publicPortfolioService } from '@/lib/portfolio/public-api-service'
 import { Portfolio, PortfolioPerformance, HoldingPerformance } from '@/types/portfolio'
 import { formatters } from '@/lib/coinmarketcap/services'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar } from 'recharts'
-import { TrendingUp, TrendingDown, Wallet, DollarSign, Activity, BarChart3, ChevronDown, Coins } from 'lucide-react'
+import { TrendingUp, TrendingDown, Wallet, DollarSign, Activity, BarChart3, ChevronDown, Coins, Clock, Zap } from 'lucide-react'
 import { format, subDays } from 'date-fns'
 
 interface PortfolioWithPerformance extends Portfolio {
@@ -14,30 +14,18 @@ interface PortfolioWithPerformance extends Portfolio {
   error?: string
 }
 
-interface DetailedMetrics {
-  totalValue: number
-  totalHoldings: number
-  topHolding: HoldingPerformance | null
-  change24h: number
-  avgPrice: number
-}
-
-const CHART_COLORS = ['#c9b06e', '#e6d59a', '#f0e7c3', '#b8a05e', '#a08f54', '#8e7d4a', '#7a6b40', '#665936']
+const CHART_COLORS = ['#d4af37', '#e6c86b', '#f2d98f', '#c4941a', '#b8860b', '#cd7f32', '#da8a67', '#ff7f50']
 
 export function PortfolioDashboard() {
   const [portfolios, setPortfolios] = useState<PortfolioWithPerformance[]>([])
   const [selectedPortfolioId, setSelectedPortfolioId] = useState<string | null>(null)
   const [selectedPortfolio, setSelectedPortfolio] = useState<PortfolioWithPerformance | null>(null)
-  const [metrics, setMetrics] = useState<DetailedMetrics | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [lastUpdated, setLastUpdated] = useState<string>('')
 
-  useEffect(() => {
-    fetchPortfoliosData()
-  }, [])
-
-  const fetchPortfoliosData = async () => {
+  const fetchPortfoliosData = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -56,7 +44,18 @@ export function PortfolioDashboard() {
           } catch (error) {
             return {
               ...portfolio,
-              performance: { totalValue: 0, holdings: [] },
+              performance: {
+                totalValue: 0,
+                totalChange24h: 0,
+                totalChangePercent24h: 0,
+                holdings: [],
+                metrics: {
+                  assetCount: 0,
+                  topPerformer: null,
+                  worstPerformer: null,
+                  lastUpdated: new Date().toISOString()
+                }
+              },
               loading: false,
               error: error instanceof Error ? error.message : 'Failed to calculate performance'
             }
@@ -65,19 +64,18 @@ export function PortfolioDashboard() {
       )
 
       setPortfolios(portfoliosWithPerformance)
+      setLastUpdated(new Date().toISOString())
 
       // Auto-select the first portfolio if none is selected
       if (!selectedPortfolioId && portfoliosWithPerformance.length > 0) {
         const firstPortfolio = portfoliosWithPerformance[0]
         setSelectedPortfolioId(firstPortfolio.id)
         setSelectedPortfolio(firstPortfolio)
-        calculateDetailedMetrics(firstPortfolio)
       } else if (selectedPortfolioId) {
         // Update the selected portfolio with fresh data
         const updatedSelected = portfoliosWithPerformance.find(p => p.id === selectedPortfolioId)
         if (updatedSelected) {
           setSelectedPortfolio(updatedSelected)
-          calculateDetailedMetrics(updatedSelected)
         }
       }
 
@@ -86,35 +84,26 @@ export function PortfolioDashboard() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [selectedPortfolioId])
 
-  const calculateDetailedMetrics = (portfolio: PortfolioWithPerformance) => {
-    const { performance } = portfolio
-    const topHolding = performance.holdings.length > 0 
-      ? performance.holdings.reduce((top, current) => 
-          current.totalValue > top.totalValue ? current : top
-        ) 
-      : null
+  useEffect(() => {
+    fetchPortfoliosData()
+  }, [fetchPortfoliosData])
 
-    const avgPrice = performance.holdings.length > 0
-      ? performance.holdings.reduce((sum, holding) => sum + holding.currentPrice, 0) / performance.holdings.length
-      : 0
+  // Set up real-time updates every 2 minutes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchPortfoliosData()
+    }, 120000) // 2 minutes
 
-    setMetrics({
-      totalValue: performance.totalValue,
-      totalHoldings: performance.holdings.length,
-      topHolding,
-      change24h: Math.random() * 10 - 5, // Mock data - would be calculated from historical data
-      avgPrice
-    })
-  }
+    return () => clearInterval(interval)
+  }, [fetchPortfoliosData])
 
   const handlePortfolioSelection = (portfolioId: string) => {
     const selected = portfolios.find(p => p.id === portfolioId)
     if (selected) {
       setSelectedPortfolioId(portfolioId)
       setSelectedPortfolio(selected)
-      calculateDetailedMetrics(selected)
       setIsDropdownOpen(false)
     }
   }
@@ -147,21 +136,10 @@ export function PortfolioDashboard() {
     })).filter(item => item.value > 0)
   }
 
-  const getHoldingsBarData = () => {
-    if (!selectedPortfolio) return []
-    
-    return selectedPortfolio.performance.holdings.map(holding => ({
-      symbol: holding.symbol,
-      amount: holding.amount,
-      value: holding.totalValue,
-      price: holding.currentPrice
-    })).sort((a, b) => b.value - a.value)
-  }
-
   if (loading) {
     return (
       <div className="min-h-screen bg-eqtech-dark p-6">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-8xl mx-auto">
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-2 border-eqtech-gold border-t-transparent"></div>
           </div>
@@ -173,7 +151,7 @@ export function PortfolioDashboard() {
   if (error) {
     return (
       <div className="min-h-screen bg-eqtech-dark p-6">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-8xl mx-auto">
           <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-6">
             <h2 className="text-xl font-semibold text-red-400 mb-2">Error Loading Portfolio Data</h2>
             <p className="text-red-300">{error}</p>
@@ -190,50 +168,103 @@ export function PortfolioDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-eqtech-dark">
-      <div className="max-w-7xl mx-auto p-6">
-        {/* Header with Portfolio Selector */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-eqtech-light font-serif mb-4">
-            Portfolio Analytics
-          </h1>
+    <div className="min-h-screen bg-eqtech-dark relative overflow-hidden">
+      {/* Premium background effects */}
+      <div className="absolute top-20 right-20 w-96 h-96 bg-eqtech-gold/5 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-20 left-20 w-80 h-80 bg-eqtech-copper/3 rounded-full blur-3xl"></div>
+      
+      <div className="relative z-10 max-w-8xl mx-auto p-8">
+        {/* Enhanced Header with Portfolio Selector */}
+        <div className="mb-12">
+          <div className="flex items-end justify-between mb-6">
+            <div className="space-y-2">
+              <div className="flex items-center space-x-3">
+                <div className="w-3 h-8 bg-gradient-to-b from-eqtech-gold to-eqtech-copper rounded-full shadow-lg shadow-eqtech-gold/20"></div>
+                <h1 className="text-6xl font-bold text-eqtech-light font-serif tracking-tight">
+                  Portfolio
+                </h1>
+              </div>
+              <h2 className="text-2xl font-light text-eqtech-gold-light ml-12 font-montserrat tracking-wide">
+                Analytics Suite
+              </h2>
+            </div>
+            
+            {/* Real-time status indicator */}
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2 px-4 py-2 bg-eqtech-surface/60 rounded-xl border border-eqtech-gold/20 backdrop-blur-sm">
+                <Zap className="w-4 h-4 text-green-400 animate-pulse" />
+                <span className="text-xs text-eqtech-gray-light font-roboto-flex uppercase tracking-wider">Live</span>
+              </div>
+              
+              {lastUpdated && (
+                <div className="flex items-center space-x-2 px-4 py-2 bg-eqtech-surface/40 rounded-xl border border-eqtech-gray-medium/20">
+                  <Clock className="w-4 h-4 text-eqtech-gray-light" />
+                  <span className="text-xs text-eqtech-gray-light">
+                    {format(new Date(lastUpdated), 'HH:mm:ss')}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
           
           {/* Portfolio Selector */}
           {portfolios.length > 0 && (
             <div className="relative inline-block">
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center space-x-3 bg-gradient-to-r from-eqtech-gray-dark to-eqtech-gray-darker border border-eqtech-gray-medium rounded-lg px-4 py-3 text-eqtech-light hover:border-eqtech-gold/50 transition-all duration-200"
+                className="flex items-center space-x-3 bg-gradient-to-r from-eqtech-surface/80 via-eqtech-surface-elevated/60 to-eqtech-surface/80 backdrop-blur-xl border border-eqtech-gray-medium/20 rounded-2xl px-6 py-4 text-eqtech-light hover:border-eqtech-gold/30 transition-all duration-300 hover:shadow-xl hover:shadow-eqtech-gold/10"
               >
-                <Wallet className="w-5 h-5 text-eqtech-gold" />
-                <span className="font-medium">
+                <Wallet className="w-6 h-6 text-eqtech-gold" />
+                <span className="font-medium text-lg">
                   {selectedPortfolio ? selectedPortfolio.name : 'Select Portfolio'}
                 </span>
-                <ChevronDown className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${isDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
               
               {isDropdownOpen && (
-                <div className="absolute top-full mt-2 w-64 bg-eqtech-gray-darker border border-eqtech-gray-medium rounded-lg shadow-2xl z-50">
-                  <div className="py-2">
-                    {portfolios.map((portfolio) => (
+                <div className="absolute top-full mt-3 w-80 bg-eqtech-surface/90 backdrop-blur-xl border border-eqtech-gray-medium/30 rounded-2xl shadow-2xl z-50">
+                  <div className="p-2">
+                    {portfolios.map((portfolio, index) => (
                       <button
                         key={portfolio.id}
                         onClick={() => handlePortfolioSelection(portfolio.id)}
-                        className={`w-full text-left px-4 py-3 hover:bg-eqtech-gray-dark transition-colors ${
-                          selectedPortfolioId === portfolio.id ? 'bg-eqtech-gold/10 text-eqtech-gold' : 'text-eqtech-light'
+                        className={`group w-full text-left p-4 rounded-xl hover:bg-eqtech-surface-elevated/80 transition-all duration-200 relative overflow-hidden ${
+                          selectedPortfolioId === portfolio.id 
+                            ? 'bg-gradient-to-r from-eqtech-gold/20 to-eqtech-copper/10 border border-eqtech-gold/30 text-eqtech-light' 
+                            : 'text-eqtech-light hover:border hover:border-eqtech-gray-medium/20'
                         }`}
                       >
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium">{portfolio.name}</span>
-                          <span className="text-sm text-eqtech-gray-light">
+                        {selectedPortfolioId === portfolio.id && (
+                          <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-eqtech-gold to-eqtech-copper rounded-full"></div>
+                        )}
+                        <div className="flex items-start justify-between mb-2">
+                          <span className="font-medium text-lg">{portfolio.name}</span>
+                          <span className="text-sm font-bold text-eqtech-gold">
                             {formatters.currency(portfolio.performance.totalValue)}
                           </span>
                         </div>
                         {portfolio.description && (
-                          <p className="text-sm text-eqtech-gray-light truncate mt-1">
+                          <p className="text-sm text-eqtech-gray-light truncate mb-2">
                             {portfolio.description}
                           </p>
                         )}
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-eqtech-gray-light">
+                            {portfolio.performance.metrics.assetCount} assets
+                          </span>
+                          {portfolio.performance.totalChangePercent24h !== 0 && (
+                            <div className={`flex items-center space-x-1 text-xs font-medium ${
+                              portfolio.performance.totalChangePercent24h >= 0 ? 'text-green-400' : 'text-red-400'
+                            }`}>
+                              {portfolio.performance.totalChangePercent24h >= 0 ? (
+                                <TrendingUp className="w-3 h-3" />
+                              ) : (
+                                <TrendingDown className="w-3 h-3" />
+                              )}
+                              <span>{portfolio.performance.totalChangePercent24h >= 0 ? '+' : ''}{portfolio.performance.totalChangePercent24h.toFixed(2)}%</span>
+                            </div>
+                          )}
+                        </div>
                       </button>
                     ))}
                   </div>
@@ -243,95 +274,137 @@ export function PortfolioDashboard() {
           )}
         </div>
 
-        {/* Portfolio Details */}
-        {selectedPortfolio && metrics ? (
+        {/* Portfolio Analytics */}
+        {selectedPortfolio ? (
           <>
-            {/* Key Metrics for Selected Portfolio */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <div className="bg-gradient-to-br from-eqtech-gray-dark to-eqtech-gray-darker border border-eqtech-gray-medium rounded-xl p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-eqtech-gray-light text-sm font-medium">Total Value</p>
-                    <p className="text-2xl font-bold text-eqtech-light mt-1">
-                      {formatters.currency(metrics.totalValue)}
+            {/* Hero Metrics Section */}
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8 mb-12">
+              {/* Total Portfolio Value */}
+              <div className="group relative bg-gradient-to-br from-eqtech-surface/80 via-eqtech-surface-elevated/60 to-eqtech-surface/80 backdrop-blur-xl border border-eqtech-gray-medium/20 rounded-3xl p-8 hover:border-eqtech-gold/30 transition-all duration-500 hover:shadow-2xl hover:shadow-eqtech-gold/10 overflow-hidden">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-eqtech-gold/10 to-transparent rounded-full blur-2xl"></div>
+                <div className="relative">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="p-4 bg-gradient-to-br from-eqtech-gold/20 to-eqtech-gold/10 rounded-2xl backdrop-blur-sm">
+                      <DollarSign className="w-8 h-8 text-eqtech-gold" />
+                    </div>
+                    <div className="text-xs text-eqtech-gray-light uppercase tracking-wider">Total Value</div>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-4xl font-bold text-eqtech-light tracking-tight">
+                      {formatters.currency(selectedPortfolio.performance.totalValue)}
                     </p>
-                  </div>
-                  <div className="p-3 bg-eqtech-gold/10 rounded-lg">
-                    <DollarSign className="w-6 h-6 text-eqtech-gold" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-br from-eqtech-gray-dark to-eqtech-gray-darker border border-eqtech-gray-medium rounded-xl p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-eqtech-gray-light text-sm font-medium">Total Holdings</p>
-                    <p className="text-2xl font-bold text-eqtech-light mt-1">
-                      {metrics.totalHoldings}
-                    </p>
-                  </div>
-                  <div className="p-3 bg-eqtech-gold/10 rounded-lg">
-                    <Coins className="w-6 h-6 text-eqtech-gold" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-br from-eqtech-gray-dark to-eqtech-gray-darker border border-eqtech-gray-medium rounded-xl p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-eqtech-gray-light text-sm font-medium">Top Holding</p>
-                    <p className="text-xl font-semibold text-eqtech-light mt-1">
-                      {metrics.topHolding ? metrics.topHolding.symbol : 'N/A'}
-                    </p>
-                    {metrics.topHolding && (
-                      <p className="text-sm text-eqtech-gray-light">
-                        {formatters.currency(metrics.topHolding.totalValue)}
-                      </p>
+                    {selectedPortfolio.performance.totalChangePercent24h !== 0 && (
+                      <div className={`flex items-center space-x-2 text-sm font-medium ${
+                        selectedPortfolio.performance.totalChangePercent24h >= 0 ? 'text-green-400' : 'text-red-400'
+                      }`}>
+                        {selectedPortfolio.performance.totalChangePercent24h >= 0 ? (
+                          <TrendingUp className="w-4 h-4" />
+                        ) : (
+                          <TrendingDown className="w-4 h-4" />
+                        )}
+                        <span>{selectedPortfolio.performance.totalChangePercent24h >= 0 ? '+' : ''}{selectedPortfolio.performance.totalChangePercent24h.toFixed(2)}% (24h)</span>
+                      </div>
                     )}
                   </div>
-                  <div className="p-3 bg-eqtech-gold/10 rounded-lg">
-                    <BarChart3 className="w-6 h-6 text-eqtech-gold" />
+                </div>
+              </div>
+
+              {/* Asset Count */}
+              <div className="group relative bg-gradient-to-br from-eqtech-surface/80 via-eqtech-surface-elevated/60 to-eqtech-surface/80 backdrop-blur-xl border border-eqtech-gray-medium/20 rounded-3xl p-8 hover:border-eqtech-copper/30 transition-all duration-500 hover:shadow-2xl hover:shadow-eqtech-copper/10 overflow-hidden">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-eqtech-copper/10 to-transparent rounded-full blur-2xl"></div>
+                <div className="relative">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="p-4 bg-gradient-to-br from-eqtech-copper/20 to-eqtech-copper/10 rounded-2xl backdrop-blur-sm">
+                      <Coins className="w-8 h-8 text-eqtech-copper" />
+                    </div>
+                    <div className="text-xs text-eqtech-gray-light uppercase tracking-wider">Assets</div>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-4xl font-bold text-eqtech-light tracking-tight">
+                      {selectedPortfolio.performance.metrics.assetCount}
+                    </p>
+                    <p className="text-sm text-eqtech-gray-light">
+                      Diversified holdings
+                    </p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-eqtech-gray-dark to-eqtech-gray-darker border border-eqtech-gray-medium rounded-xl p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-eqtech-gray-light text-sm font-medium">24h Change</p>
-                    <div className="flex items-center mt-1">
-                      <p className={`text-2xl font-bold ${metrics.change24h >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                        {metrics.change24h >= 0 ? '+' : ''}{metrics.change24h.toFixed(2)}%
-                      </p>
-                      {metrics.change24h >= 0 ? (
-                        <TrendingUp className="w-5 h-5 text-green-400 ml-2" />
-                      ) : (
-                        <TrendingDown className="w-5 h-5 text-red-400 ml-2" />
-                      )}
+              {/* Top Performer */}
+              <div className="group relative bg-gradient-to-br from-eqtech-surface/80 via-eqtech-surface-elevated/60 to-eqtech-surface/80 backdrop-blur-xl border border-eqtech-gray-medium/20 rounded-3xl p-8 hover:border-green-400/30 transition-all duration-500 hover:shadow-2xl hover:shadow-green-400/10 overflow-hidden">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-green-400/10 to-transparent rounded-full blur-2xl"></div>
+                <div className="relative">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="p-4 bg-gradient-to-br from-green-400/20 to-green-400/10 rounded-2xl backdrop-blur-sm">
+                      <TrendingUp className="w-8 h-8 text-green-400" />
                     </div>
+                    <div className="text-xs text-eqtech-gray-light uppercase tracking-wider">Top Performer</div>
                   </div>
-                  <div className="p-3 bg-eqtech-gold/10 rounded-lg">
-                    <Activity className="w-6 h-6 text-eqtech-gold" />
+                  <div className="space-y-2">
+                    {selectedPortfolio.performance.metrics.topPerformer ? (
+                      <>
+                        <p className="text-2xl font-bold text-eqtech-light tracking-tight">
+                          {selectedPortfolio.performance.metrics.topPerformer.symbol}
+                        </p>
+                        <div className="flex items-center space-x-2 text-sm font-medium text-green-400">
+                          <span>+{selectedPortfolio.performance.metrics.topPerformer.changePercent.toFixed(2)}%</span>
+                        </div>
+                      </>
+                    ) : (
+                      <p className="text-xl text-eqtech-gray-light">No data</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Worst Performer */}
+              <div className="group relative bg-gradient-to-br from-eqtech-surface/80 via-eqtech-surface-elevated/60 to-eqtech-surface/80 backdrop-blur-xl border border-eqtech-gray-medium/20 rounded-3xl p-8 hover:border-red-400/30 transition-all duration-500 hover:shadow-2xl hover:shadow-red-400/10 overflow-hidden">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-red-400/10 to-transparent rounded-full blur-2xl"></div>
+                <div className="relative">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="p-4 bg-gradient-to-br from-red-400/20 to-red-400/10 rounded-2xl backdrop-blur-sm">
+                      <TrendingDown className="w-8 h-8 text-red-400" />
+                    </div>
+                    <div className="text-xs text-eqtech-gray-light uppercase tracking-wider">Needs Attention</div>
+                  </div>
+                  <div className="space-y-2">
+                    {selectedPortfolio.performance.metrics.worstPerformer ? (
+                      <>
+                        <p className="text-2xl font-bold text-eqtech-light tracking-tight">
+                          {selectedPortfolio.performance.metrics.worstPerformer.symbol}
+                        </p>
+                        <div className="flex items-center space-x-2 text-sm font-medium text-red-400">
+                          <span>{selectedPortfolio.performance.metrics.worstPerformer.changePercent.toFixed(2)}%</span>
+                        </div>
+                      </>
+                    ) : (
+                      <p className="text-xl text-eqtech-gray-light">No data</p>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Charts Section */}
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
-              {/* Holdings Distribution Pie Chart */}
-              <div className="bg-gradient-to-br from-eqtech-gray-dark to-eqtech-gray-darker border border-eqtech-gray-medium rounded-xl p-6">
-                <h3 className="text-xl font-semibold text-eqtech-light mb-4">Holdings Distribution</h3>
+            {/* Charts and Analytics Section */}
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-12">
+              {/* Asset Allocation Chart */}
+              <div className="bg-gradient-to-br from-eqtech-surface/80 via-eqtech-surface-elevated/60 to-eqtech-surface/80 backdrop-blur-xl border border-eqtech-gray-medium/20 rounded-3xl p-8">
+                <h3 className="text-2xl font-semibold text-eqtech-light mb-6 flex items-center space-x-3">
+                  <BarChart3 className="w-6 h-6 text-eqtech-gold" />
+                  <span>Asset Allocation</span>
+                </h3>
                 {getHoldingsDistributionData().length > 0 ? (
-                  <ResponsiveContainer width="100%" height={350}>
+                  <ResponsiveContainer width="100%" height={400}>
                     <PieChart>
                       <Pie
                         data={getHoldingsDistributionData()}
                         cx="50%"
                         cy="50%"
-                        outerRadius={120}
+                        outerRadius={140}
+                        innerRadius={60}
                         dataKey="value"
-                        label={({ name, percentage }) => `${name} (${percentage.toFixed(1)}%)`}
+                        label={({ name, percentage }) => `${name} ${percentage.toFixed(1)}%`}
+                        labelLine={false}
                       >
                         {getHoldingsDistributionData().map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.color} />
@@ -340,137 +413,137 @@ export function PortfolioDashboard() {
                       <Tooltip 
                         formatter={(value: number) => [formatters.currency(value), 'Value']}
                         contentStyle={{
-                          backgroundColor: '#1a1a1a',
-                          border: '1px solid #333',
-                          borderRadius: '8px',
-                          color: '#fff'
+                          backgroundColor: 'rgba(15, 20, 25, 0.95)',
+                          border: '1px solid rgba(212, 175, 55, 0.3)',
+                          borderRadius: '12px',
+                          color: '#fff',
+                          backdropFilter: 'blur(10px)'
                         }}
                       />
                     </PieChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="flex items-center justify-center h-[350px] text-eqtech-gray-light">
-                    No holdings data available
+                  <div className="flex items-center justify-center h-[400px] text-eqtech-gray-light">
+                    No allocation data available
                   </div>
                 )}
               </div>
 
-              {/* Performance Trends */}
-              <div className="bg-gradient-to-br from-eqtech-gray-dark to-eqtech-gray-darker border border-eqtech-gray-medium rounded-xl p-6">
-                <h3 className="text-xl font-semibold text-eqtech-light mb-4">Performance Trends (30 Days)</h3>
+              {/* Performance Chart */}
+              <div className="bg-gradient-to-br from-eqtech-surface/80 via-eqtech-surface-elevated/60 to-eqtech-surface/80 backdrop-blur-xl border border-eqtech-gray-medium/20 rounded-3xl p-8">
+                <h3 className="text-2xl font-semibold text-eqtech-light mb-6 flex items-center space-x-3">
+                  <Activity className="w-6 h-6 text-eqtech-gold" />
+                  <span>Performance Trends</span>
+                </h3>
                 {selectedPortfolio.performance.totalValue > 0 ? (
-                  <ResponsiveContainer width="100%" height={350}>
+                  <ResponsiveContainer width="100%" height={400}>
                     <LineChart data={generateMockChartData(selectedPortfolio)}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                      <XAxis dataKey="date" stroke="#888" />
-                      <YAxis stroke="#888" tickFormatter={(value) => formatters.currency(value)} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                      <XAxis dataKey="date" stroke="#888" fontSize={12} />
+                      <YAxis stroke="#888" tickFormatter={(value) => formatters.currencyCompact(value)} fontSize={12} />
                       <Tooltip 
                         formatter={(value: number) => [formatters.currency(value), 'Portfolio Value']}
                         contentStyle={{
-                          backgroundColor: '#1a1a1a',
-                          border: '1px solid #333',
-                          borderRadius: '8px',
-                          color: '#fff'
+                          backgroundColor: 'rgba(15, 20, 25, 0.95)',
+                          border: '1px solid rgba(212, 175, 55, 0.3)',
+                          borderRadius: '12px',
+                          color: '#fff',
+                          backdropFilter: 'blur(10px)'
                         }}
                       />
                       <Line 
                         type="monotone" 
                         dataKey="value" 
-                        stroke="#c9b06e" 
+                        stroke="#d4af37" 
                         strokeWidth={3}
-                        dot={false}
+                        dot={{ fill: '#d4af37', strokeWidth: 2, r: 4 }}
+                        activeDot={{ r: 6, stroke: '#d4af37', strokeWidth: 2 }}
                       />
                     </LineChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="flex items-center justify-center h-[350px] text-eqtech-gray-light">
+                  <div className="flex items-center justify-center h-[400px] text-eqtech-gray-light">
                     No performance data available
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Holdings Bar Chart */}
-            <div className="mb-8">
-              <div className="bg-gradient-to-br from-eqtech-gray-dark to-eqtech-gray-darker border border-eqtech-gray-medium rounded-xl p-6">
-                <h3 className="text-xl font-semibold text-eqtech-light mb-4">Holdings Value Comparison</h3>
-                {getHoldingsBarData().length > 0 ? (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={getHoldingsBarData()} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                      <XAxis dataKey="symbol" stroke="#888" />
-                      <YAxis stroke="#888" tickFormatter={(value) => formatters.currency(value)} />
-                      <Tooltip 
-                        formatter={(value: number) => [formatters.currency(value), 'Value']}
-                        contentStyle={{
-                          backgroundColor: '#1a1a1a',
-                          border: '1px solid #333',
-                          borderRadius: '8px',
-                          color: '#fff'
-                        }}
-                      />
-                      <Bar dataKey="value" fill="#c9b06e" radius={[4, 4, 0, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="flex items-center justify-center h-[300px] text-eqtech-gray-light">
-                    No holdings data available
-                  </div>
-                )}
-              </div>
-            </div>
-
             {/* Detailed Holdings Table */}
-            <div className="bg-gradient-to-br from-eqtech-gray-dark to-eqtech-gray-darker border border-eqtech-gray-medium rounded-xl p-6">
-              <h3 className="text-xl font-semibold text-eqtech-light mb-6">Detailed Holdings</h3>
+            <div className="bg-gradient-to-br from-eqtech-surface/80 via-eqtech-surface-elevated/60 to-eqtech-surface/80 backdrop-blur-xl border border-eqtech-gray-medium/20 rounded-3xl p-8">
+              <h3 className="text-2xl font-semibold text-eqtech-light mb-8 flex items-center space-x-3">
+                <Wallet className="w-6 h-6 text-eqtech-gold" />
+                <span>Portfolio Holdings</span>
+              </h3>
               {selectedPortfolio.performance.holdings.length > 0 ? (
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b border-eqtech-gray-medium">
-                        <th className="text-left py-3 px-4 text-eqtech-gray-light font-medium">Asset</th>
-                        <th className="text-right py-3 px-4 text-eqtech-gray-light font-medium">Amount</th>
-                        <th className="text-right py-3 px-4 text-eqtech-gray-light font-medium">Price</th>
-                        <th className="text-right py-3 px-4 text-eqtech-gray-light font-medium">Total Value</th>
-                        <th className="text-right py-3 px-4 text-eqtech-gray-light font-medium">Weight</th>
+                      <tr className="border-b border-eqtech-gray-medium/30">
+                        <th className="text-left py-4 px-2 text-eqtech-gray-light font-medium text-sm uppercase tracking-wider">Asset</th>
+                        <th className="text-right py-4 px-2 text-eqtech-gray-light font-medium text-sm uppercase tracking-wider">Amount</th>
+                        <th className="text-right py-4 px-2 text-eqtech-gray-light font-medium text-sm uppercase tracking-wider">Price</th>
+                        <th className="text-right py-4 px-2 text-eqtech-gray-light font-medium text-sm uppercase tracking-wider">24h Change</th>
+                        <th className="text-right py-4 px-2 text-eqtech-gray-light font-medium text-sm uppercase tracking-wider">Total Value</th>
+                        <th className="text-right py-4 px-2 text-eqtech-gray-light font-medium text-sm uppercase tracking-wider">Weight</th>
                       </tr>
                     </thead>
                     <tbody>
                       {selectedPortfolio.performance.holdings
                         .sort((a, b) => b.totalValue - a.totalValue)
-                        .map((holding, index) => {
-                          const weight = selectedPortfolio.performance.totalValue > 0 
-                            ? (holding.totalValue / selectedPortfolio.performance.totalValue) * 100 
-                            : 0
-                          
-                          return (
-                            <tr key={index} className="border-b border-eqtech-gray-medium/30 hover:bg-eqtech-gray-medium/10 transition-colors">
-                              <td className="py-4 px-4">
-                                <div className="flex items-center space-x-3">
-                                  <div className={`w-3 h-3 rounded-full`} style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }}></div>
-                                  <span className="font-semibold text-eqtech-light">{holding.symbol}</span>
+                        .map((holding, index) => (
+                          <tr key={index} className="border-b border-eqtech-gray-medium/20 hover:bg-eqtech-surface-elevated/30 transition-colors group">
+                            <td className="py-6 px-2">
+                              <div className="flex items-center space-x-3">
+                                <div className={`w-4 h-4 rounded-full flex-shrink-0`} style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }}></div>
+                                <span className="font-semibold text-eqtech-light text-lg">{holding.symbol}</span>
+                              </div>
+                            </td>
+                            <td className="text-right py-6 px-2 text-eqtech-light font-medium">
+                              {holding.amount.toLocaleString(undefined, { maximumFractionDigits: 6 })}
+                            </td>
+                            <td className="text-right py-6 px-2 text-eqtech-light font-medium">
+                              {formatters.currency(holding.currentPrice)}
+                            </td>
+                            <td className="text-right py-6 px-2">
+                              {holding.priceChangePercent24h !== 0 ? (
+                                <div className={`flex items-center justify-end space-x-1 font-medium ${
+                                  holding.priceChangePercent24h >= 0 ? 'text-green-400' : 'text-red-400'
+                                }`}>
+                                  {holding.priceChangePercent24h >= 0 ? (
+                                    <TrendingUp className="w-4 h-4" />
+                                  ) : (
+                                    <TrendingDown className="w-4 h-4" />
+                                  )}
+                                  <span>{holding.priceChangePercent24h >= 0 ? '+' : ''}{holding.priceChangePercent24h.toFixed(2)}%</span>
                                 </div>
-                              </td>
-                              <td className="text-right py-4 px-4 text-eqtech-light">
-                                {holding.amount.toLocaleString(undefined, { maximumFractionDigits: 6 })}
-                              </td>
-                              <td className="text-right py-4 px-4 text-eqtech-light">
-                                {formatters.currency(holding.currentPrice)}
-                              </td>
-                              <td className="text-right py-4 px-4 text-eqtech-light font-semibold">
-                                {formatters.currency(holding.totalValue)}
-                              </td>
-                              <td className="text-right py-4 px-4 text-eqtech-gold">
-                                {weight.toFixed(2)}%
-                              </td>
-                            </tr>
-                          )
-                        })}
+                              ) : (
+                                <span className="text-eqtech-gray-light">-</span>
+                              )}
+                            </td>
+                            <td className="text-right py-6 px-2 text-eqtech-light font-bold text-lg">
+                              {formatters.currency(holding.totalValue)}
+                            </td>
+                            <td className="text-right py-6 px-2">
+                              <div className="flex items-center justify-end space-x-2">
+                                <div className="w-16 h-2 bg-eqtech-gray-dark rounded-full overflow-hidden">
+                                  <div 
+                                    className="h-full bg-gradient-to-r from-eqtech-gold to-eqtech-copper rounded-full transition-all duration-500"
+                                    style={{ width: `${Math.min(100, holding.portfolioWeight)}%` }}
+                                  ></div>
+                                </div>
+                                <span className="text-eqtech-gold font-medium min-w-[3rem]">
+                                  {holding.portfolioWeight.toFixed(1)}%
+                                </span>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
                     </tbody>
                   </table>
                 </div>
               ) : (
-                <div className="text-center py-8 text-eqtech-gray-light">
+                <div className="text-center py-12 text-eqtech-gray-light">
                   No holdings available for this portfolio
                 </div>
               )}
@@ -478,21 +551,21 @@ export function PortfolioDashboard() {
           </>
         ) : !loading && portfolios.length === 0 ? (
           <div className="text-center py-12">
-            <div className="p-4 bg-eqtech-gold/10 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-              <Wallet className="w-8 h-8 text-eqtech-gold" />
+            <div className="p-6 bg-eqtech-gold/10 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center">
+              <Wallet className="w-12 h-12 text-eqtech-gold" />
             </div>
-            <h3 className="text-xl font-semibold text-eqtech-light mb-2">No Portfolios Found</h3>
-            <p className="text-eqtech-gray-light">
+            <h3 className="text-2xl font-semibold text-eqtech-light mb-4">No Portfolios Found</h3>
+            <p className="text-eqtech-gray-light text-lg">
               Contact an administrator to create your first portfolio.
             </p>
           </div>
         ) : !selectedPortfolio && portfolios.length > 0 ? (
           <div className="text-center py-12">
-            <div className="p-4 bg-eqtech-gold/10 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-              <BarChart3 className="w-8 h-8 text-eqtech-gold" />
+            <div className="p-6 bg-eqtech-gold/10 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center">
+              <BarChart3 className="w-12 h-12 text-eqtech-gold" />
             </div>
-            <h3 className="text-xl font-semibold text-eqtech-light mb-2">Select a Portfolio</h3>
-            <p className="text-eqtech-gray-light">
+            <h3 className="text-2xl font-semibent text-eqtech-light mb-4">Select a Portfolio</h3>
+            <p className="text-eqtech-gray-light text-lg">
               Choose a portfolio from the dropdown above to view detailed analytics.
             </p>
           </div>
