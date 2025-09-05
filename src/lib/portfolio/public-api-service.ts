@@ -1,6 +1,13 @@
-import { Portfolio, PortfolioPerformance, HoldingPerformance, PortfolioMetrics, AssetPerformance } from '@/types/portfolio'
+import { 
+  Portfolio, 
+  PortfolioPerformance, 
+  HoldingPerformance, 
+  PortfolioMetrics, 
+  AssetPerformance,
+  CreatePortfolioData,
+  AddHoldingData 
+} from '@/types/portfolio'
 import { cryptoService } from '@/lib/coinmarketcap/services'
-import { historicalDataService, type HistoricalPortfolioData } from './historical-data-service'
 import type { CryptoCurrency } from '@/types/crypto'
 
 interface ApiResponse<T = unknown> {
@@ -9,17 +16,24 @@ interface ApiResponse<T = unknown> {
   error?: string
 }
 
-export class PublicPortfolioService {
-  private baseUrl = '/api/portfolios'
+/**
+ * Unified Portfolio Service - handles both read-only and admin operations
+ * with optimized batch crypto data fetching to avoid N+1 performance issues
+ */
+export class UnifiedPortfolioService {
+  private readOnlyBaseUrl = '/api/portfolios'
+  private adminBaseUrl = '/api/admin/portfolios'
 
   /**
    * Make authenticated API request
    */
   private async makeRequest<T>(
     endpoint: string, 
-    options: RequestInit = {}
+    options: RequestInit = {},
+    useAdminEndpoint = false
   ): Promise<T> {
-    const url = `${this.baseUrl}${endpoint}`
+    const baseUrl = useAdminEndpoint ? this.adminBaseUrl : this.readOnlyBaseUrl
+    const url = `${baseUrl}${endpoint}`
     
     const response = await fetch(url, {
       headers: {
@@ -46,6 +60,71 @@ export class PublicPortfolioService {
   }
 
   /**
+   * Get portfolio by ID (admin operation)
+   */
+  async getPortfolioById(id: string): Promise<Portfolio> {
+    return this.makeRequest<Portfolio>(`/${id}`, {}, true)
+  }
+
+  /**
+   * Create new portfolio (admin operation)
+   */
+  async createPortfolio(data: CreatePortfolioData): Promise<Portfolio> {
+    return this.makeRequest<Portfolio>('', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }, true)
+  }
+
+  /**
+   * Update portfolio (admin operation)
+   */
+  async updatePortfolio(id: string, data: Partial<CreatePortfolioData>): Promise<Portfolio> {
+    return this.makeRequest<Portfolio>(`/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }, true)
+  }
+
+  /**
+   * Delete portfolio (admin operation)
+   */
+  async deletePortfolio(id: string): Promise<void> {
+    await this.makeRequest(`/${id}`, {
+      method: 'DELETE',
+    }, true)
+  }
+
+  /**
+   * Add holding to portfolio (admin operation)
+   */
+  async addHolding(portfolioId: string, holdingData: AddHoldingData): Promise<Portfolio> {
+    return this.makeRequest<Portfolio>(`/${portfolioId}/holdings`, {
+      method: 'POST',
+      body: JSON.stringify(holdingData),
+    }, true)
+  }
+
+  /**
+   * Update holding amount (admin operation)
+   */
+  async updateHolding(portfolioId: string, holdingId: string, amount: number): Promise<Portfolio> {
+    return this.makeRequest<Portfolio>(`/${portfolioId}/holdings/${holdingId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ amount }),
+    }, true)
+  }
+
+  /**
+   * Remove holding from portfolio (admin operation)
+   */
+  async removeHolding(portfolioId: string, holdingId: string): Promise<Portfolio> {
+    return this.makeRequest<Portfolio>(`/${portfolioId}/holdings/${holdingId}`, {
+      method: 'DELETE',
+    }, true)
+  }
+
+  /**
    * Calculate portfolio performance using BATCH-OPTIMIZED CoinMarketCap API
    */
   async calculatePerformance(portfolio: Portfolio): Promise<PortfolioPerformance> {
@@ -65,7 +144,7 @@ export class PublicPortfolioService {
     }
 
     try {
-      // OPTIMIZATION: Batch fetch all crypto prices at once
+      // BATCH OPTIMIZATION: Fetch all crypto prices at once to avoid N+1 queries
       const symbols = portfolio.holdings.map(h => h.symbol)
       const cryptoMap = await cryptoService.getCryptocurrenciesBySymbols(symbols)
       
@@ -208,55 +287,6 @@ export class PublicPortfolioService {
     }
   }
 
-  /**
-   * Calculate historical portfolio performance
-   */
-  async calculateHistoricalPerformance(
-    portfolio: Portfolio,
-    days?: number
-  ): Promise<HistoricalPortfolioData[]>
-  
-  /**
-   * Calculate historical portfolio performance with pre-computed performance (OPTIMIZED)
-   * Use this overload when you already have current performance data to avoid duplicate API calls
-   */
-  async calculateHistoricalPerformance(
-    portfolio: Portfolio,
-    currentPerformance: PortfolioPerformance,
-    days?: number
-  ): Promise<HistoricalPortfolioData[]>
-  
-  async calculateHistoricalPerformance(
-    portfolio: Portfolio,
-    daysOrPerformance: number | PortfolioPerformance = 30,
-    days?: number
-  ): Promise<HistoricalPortfolioData[]> {
-    try {
-      let currentPerformance: PortfolioPerformance
-      let actualDays: number
-      
-      // Handle overloaded parameters
-      if (typeof daysOrPerformance === 'number') {
-        // First overload: calculateHistoricalPerformance(portfolio, days)
-        actualDays = daysOrPerformance
-        // Get current performance to ensure we have up-to-date holdings data
-        currentPerformance = await this.calculatePerformance(portfolio)
-      } else {
-        // Second overload: calculateHistoricalPerformance(portfolio, performance, days)
-        currentPerformance = daysOrPerformance
-        actualDays = days || 30
-      }
-      
-      return await historicalDataService.calculateHistoricalPortfolioPerformance(
-        portfolio,
-        currentPerformance.holdings,
-        actualDays
-      )
-    } catch (error) {
-      console.error('Error calculating historical portfolio performance:', error)
-      return []
-    }
-  }
 
   /**
    * Calculate performance for multiple portfolios - BATCH OPTIMIZED
@@ -412,21 +442,107 @@ export class PublicPortfolioService {
       metrics
     }
   }
+
+  /**
+   * PERFORMANCE OPTIMIZATION: Enhanced calculatePerformance that uses batch crypto fetching
+   * This method replaces the inefficient Promise.all individual calls in the old api-service
+   */
+  async calculatePerformanceOptimized(portfolio: Portfolio): Promise<PortfolioPerformance> {
+    if (portfolio.holdings.length === 0) {
+      return {
+        totalValue: 0,
+        totalChange24h: 0,
+        totalChangePercent24h: 0,
+        holdings: [],
+        metrics: {
+          assetCount: 0,
+          topPerformer: null,
+          worstPerformer: null,
+          lastUpdated: new Date().toISOString()
+        }
+      }
+    }
+
+    try {
+      // BATCH OPTIMIZATION: Single API call for all symbols instead of N individual calls
+      const symbols = portfolio.holdings.map(h => h.symbol)
+      const cryptoMap = await cryptoService.getCryptocurrenciesBySymbols(symbols)
+      
+      // Use the existing optimized calculation method
+      return this.calculatePerformanceFromCryptoMap(portfolio, cryptoMap)
+    } catch (error) {
+      console.error('Error calculating optimized portfolio performance:', error)
+      return {
+        totalValue: 0,
+        totalChange24h: 0,
+        totalChangePercent24h: 0,
+        holdings: portfolio.holdings.map(holding => this.createEmptyHolding(holding)),
+        metrics: {
+          assetCount: portfolio.holdings.length,
+          topPerformer: null,
+          worstPerformer: null,
+          lastUpdated: new Date().toISOString()
+        }
+      }
+    }
+  }
 }
 
 // Create singleton instance
-export const publicPortfolioService = new PublicPortfolioService()
+export const portfolioService = new UnifiedPortfolioService()
 
-// Create hook for easy use in React components
+// Backward compatibility exports
+export const publicPortfolioService = portfolioService
+export const apiPortfolioService = portfolioService
+
+// Create hook for read-only portfolio operations
 export function usePublicPortfolios() {
   return {
-    getPortfolios: () => publicPortfolioService.getPortfolios(),
+    getPortfolios: () => portfolioService.getPortfolios(),
     calculatePerformance: (portfolio: Portfolio) => 
-      publicPortfolioService.calculatePerformance(portfolio),
-    calculateHistoricalPerformance: (portfolio: Portfolio, days?: number) =>
-      publicPortfolioService.calculateHistoricalPerformance(portfolio, days),
+      portfolioService.calculatePerformanceOptimized(portfolio),
     // BATCH OPTIMIZED METHODS
     calculateMultiplePortfolioPerformances: (portfolios: Portfolio[]) =>
-      publicPortfolioService.calculateMultiplePortfolioPerformances(portfolios)
+      portfolioService.calculateMultiplePortfolioPerformances(portfolios)
+  }
+}
+
+// Create hook for admin portfolio operations
+export function useAdminPortfolios() {
+  return {
+    getPortfolios: () => portfolioService.getPortfolios(),
+    getPortfolioById: (id: string) => portfolioService.getPortfolioById(id),
+    createPortfolio: (data: CreatePortfolioData) => portfolioService.createPortfolio(data),
+    updatePortfolio: (id: string, data: Partial<CreatePortfolioData>) => 
+      portfolioService.updatePortfolio(id, data),
+    deletePortfolio: (id: string) => portfolioService.deletePortfolio(id),
+    addHolding: (portfolioId: string, holdingData: AddHoldingData) => 
+      portfolioService.addHolding(portfolioId, holdingData),
+    updateHolding: (portfolioId: string, holdingId: string, amount: number) => 
+      portfolioService.updateHolding(portfolioId, holdingId, amount),
+    removeHolding: (portfolioId: string, holdingId: string) => 
+      portfolioService.removeHolding(portfolioId, holdingId),
+    calculatePerformance: (portfolio: Portfolio) => 
+      portfolioService.calculatePerformanceOptimized(portfolio)
+  }
+}
+
+// Create hook that auto-detects and uses the optimized batch method for admin operations
+export function useApiPortfolios() {
+  return {
+    getPortfolios: () => portfolioService.getPortfolios(),
+    getPortfolioById: (id: string) => portfolioService.getPortfolioById(id),
+    createPortfolio: (data: CreatePortfolioData) => portfolioService.createPortfolio(data),
+    updatePortfolio: (id: string, data: Partial<CreatePortfolioData>) => 
+      portfolioService.updatePortfolio(id, data),
+    deletePortfolio: (id: string) => portfolioService.deletePortfolio(id),
+    addHolding: (portfolioId: string, holdingData: AddHoldingData) => 
+      portfolioService.addHolding(portfolioId, holdingData),
+    updateHolding: (portfolioId: string, holdingId: string, amount: number) => 
+      portfolioService.updateHolding(portfolioId, holdingId, amount),
+    removeHolding: (portfolioId: string, holdingId: string) => 
+      portfolioService.removeHolding(portfolioId, holdingId),
+    calculatePerformance: (portfolio: Portfolio) => 
+      portfolioService.calculatePerformanceOptimized(portfolio)
   }
 }

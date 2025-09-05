@@ -97,7 +97,7 @@ export function HoldingsTable({
                         name={holding.cryptoName}
                         size={16}
                         className="shadow-sm"
-                        showFallbackInitial={false}
+                        showFallbackInitial={true}
                       />
                       <div>
                         <span className="font-semibold text-eqtech-light text-lg">

@@ -3,10 +3,9 @@
 import { useEffect, useState, useCallback } from 'react'
 import { publicPortfolioService } from '@/lib/portfolio/public-api-service'
 import { Portfolio, PortfolioPerformance } from '@/types/portfolio'
-import { HistoricalPortfolioData } from '@/lib/portfolio/historical-data-service'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
-import { TrendingUp, TrendingDown, Wallet, DollarSign, Activity, BarChart3, Coins, Clock, Zap } from 'lucide-react'
-import { format, subDays } from 'date-fns'
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts'
+import { TrendingUp, TrendingDown, Wallet, DollarSign, BarChart3, Coins, Clock, Zap } from 'lucide-react'
+import { format } from 'date-fns'
 import { HoldingsTable } from './holdings-table'
 
 interface PortfolioDetailViewProps {
@@ -17,7 +16,6 @@ interface PortfolioWithPerformance extends Portfolio {
   performance: PortfolioPerformance
   loading: boolean
   error?: string
-  historicalData?: HistoricalPortfolioData[]
 }
 
 const CHART_COLORS = ['#d4af37', '#e6c86b', '#f2d98f', '#c4941a', '#b8860b', '#e6c46b', '#f0d982', '#deb887']
@@ -43,7 +41,6 @@ export function PortfolioDetailView({ portfolioId }: PortfolioDetailViewProps) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [lastUpdated, setLastUpdated] = useState<string>('')
-  const [historicalDataLoading, setHistoricalDataLoading] = useState(false)
 
   const fetchPortfolioData = useCallback(async () => {
     try {
@@ -75,27 +72,6 @@ export function PortfolioDetailView({ portfolioId }: PortfolioDetailViewProps) {
     }
   }, [portfolioId])
 
-  // Fetch historical data for selected portfolio using pre-computed performance (OPTIMIZED)
-  const fetchHistoricalData = useCallback(async (portfolioData: Portfolio, performance: PortfolioPerformance) => {
-    if (!portfolioData || !performance) return
-
-    try {
-      setHistoricalDataLoading(true)
-      // Use optimized overload that accepts pre-computed performance to avoid duplicate API calls
-      const historicalData = await publicPortfolioService.calculateHistoricalPerformance(portfolioData, performance, 30)
-      
-      setPortfolio(prev => prev ? {
-        ...prev,
-        historicalData
-      } : null)
-
-    } catch (error) {
-      console.error('Error fetching historical data:', error)
-    } finally {
-      setHistoricalDataLoading(false)
-    }
-  }, [])
-
   useEffect(() => {
     fetchPortfolioData()
   }, [fetchPortfolioData])
@@ -108,39 +84,6 @@ export function PortfolioDetailView({ portfolioId }: PortfolioDetailViewProps) {
 
     return () => clearInterval(interval)
   }, [fetchPortfolioData])
-
-  // Fetch historical data when portfolio is loaded
-  useEffect(() => {
-    if (portfolio && !portfolio.historicalData && !portfolio.loading && portfolio.performance) {
-      fetchHistoricalData(portfolio, portfolio.performance)
-    }
-  }, [portfolio, fetchHistoricalData])
-
-  // Use real historical data or fall back to mock data
-  const getChartData = (portfolioData: PortfolioWithPerformance) => {
-    if (portfolioData.historicalData && portfolioData.historicalData.length > 0) {
-      // Use real historical data
-      return portfolioData.historicalData.map(dataPoint => ({
-        date: format(new Date(dataPoint.timestamp), 'MMM dd'),
-        value: dataPoint.value || 0,
-        timestamp: dataPoint.timestamp
-      }))
-    }
-
-    // Fallback to mock ROI data (should rarely happen now)
-    const data = []
-    const baseROI = portfolioData.performance.totalChangePercent24h || 0
-    for (let i = 30; i >= 0; i--) {
-      const date = subDays(new Date(), i)
-      const variance = baseROI * 0.2 * (Math.random() - 0.5)
-      data.push({
-        date: format(date, 'MMM dd'),
-        value: baseROI + variance,
-        timestamp: date.getTime()
-      })
-    }
-    return data
-  }
 
   const getHoldingsDistributionData = () => {
     if (!portfolio) return []
@@ -347,9 +290,9 @@ export function PortfolioDetailView({ portfolioId }: PortfolioDetailViewProps) {
         </div>
 
         {/* Charts and Analytics Section */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-12">
+        <div className="flex justify-center mb-12">
           {/* Asset Allocation Chart */}
-          <div className="bg-gradient-to-br from-eqtech-surface/80 via-eqtech-surface-elevated/60 to-eqtech-surface/80 backdrop-blur-xl border border-eqtech-gray-medium/20 rounded-3xl p-8">
+          <div className="w-full max-w-2xl bg-gradient-to-br from-eqtech-surface/80 via-eqtech-surface-elevated/60 to-eqtech-surface/80 backdrop-blur-xl border border-eqtech-gray-medium/20 rounded-3xl p-8">
             <h3 className="text-2xl font-semibold text-eqtech-light mb-6 flex items-center space-x-3">
               <BarChart3 className="w-6 h-6 text-eqtech-gold" />
               <span>Asset Allocation</span>
@@ -386,48 +329,6 @@ export function PortfolioDetailView({ portfolioId }: PortfolioDetailViewProps) {
             ) : (
               <div className="flex items-center justify-center h-[400px] text-eqtech-gray-light">
                 No allocation data available
-              </div>
-            )}
-          </div>
-
-          {/* Performance Chart */}
-          <div className="bg-gradient-to-br from-eqtech-surface/80 via-eqtech-surface-elevated/60 to-eqtech-surface/80 backdrop-blur-xl border border-eqtech-gray-medium/20 rounded-3xl p-8">
-            <h3 className="text-2xl font-semibold text-eqtech-light mb-6 flex items-center space-x-3">
-              <Activity className="w-6 h-6 text-eqtech-gold" />
-              <span>Performance Trends</span>
-              {historicalDataLoading && (
-                <div className="animate-spin rounded-full h-5 w-5 border-2 border-eqtech-gold border-t-transparent"></div>
-              )}
-            </h3>
-            {portfolio.performance.holdings.length > 0 ? (
-              <ResponsiveContainer width="100%" height={400}>
-                <LineChart data={getChartData(portfolio)}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                  <XAxis dataKey="date" stroke="#888" fontSize={12} />
-                  <YAxis stroke="#888" tickFormatter={(value) => `${value.toFixed(1)}%`} fontSize={12} />
-                  <Tooltip 
-                    formatter={(value: number) => [`${value.toFixed(2)}%`, 'ROI Trend']}
-                    contentStyle={{
-                      backgroundColor: 'rgba(15, 20, 25, 0.95)',
-                      border: '1px solid rgba(212, 175, 55, 0.3)',
-                      borderRadius: '12px',
-                      color: '#fff',
-                      backdropFilter: 'blur(10px)'
-                    }}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="value" 
-                    stroke="#d4af37" 
-                    strokeWidth={3}
-                    dot={{ fill: '#d4af37', strokeWidth: 2, r: 4 }}
-                    activeDot={{ r: 6, stroke: '#d4af37', strokeWidth: 2 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="flex items-center justify-center h-[400px] text-eqtech-gray-light">
-                No performance data available
               </div>
             )}
           </div>
