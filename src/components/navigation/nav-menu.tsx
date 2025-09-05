@@ -122,27 +122,23 @@ export function NavMenu() {
           {/* Premium Header */}
           <div className="p-8 border-b border-gradient-to-r border-eqtech-gold/20">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                {/* Premium Logo/Brand Icon */}
-                <div className="relative">
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-eqtech-gold via-eqtech-gold-light to-eqtech-gold-light flex items-center justify-center shadow-2xl shadow-eqtech-gold/30 overflow-hidden">
-                    <Image 
-                      src="/logo.png" 
-                      alt="EQTech Investments Logo" 
-                      width={32} 
-                      height={32} 
-                      className="object-contain"
-                    />
-                  </div>
-                  <div className="absolute inset-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-eqtech-gold to-eqtech-gold-light opacity-50 blur-lg"></div>
-                </div>
-                <div className="space-y-1">
-                  <h2 className="font-bold text-xl text-eqtech-light font-montserrat tracking-tight">EQTech</h2>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-eqtech-gold rounded-full"></div>
-                    <p className="text-xs text-eqtech-gold-light font-roboto-flex uppercase tracking-wider">Investment Suite</p>
-                  </div>
-                </div>
+              {/* Logo con efecto de brillo sutil */}
+              <div className="logo group relative">
+                <h1 className="text-xl md:text-2xl font-bold flex items-center">
+                  <Image 
+                    src="/logo.png" 
+                    alt="EQTech Investments Logo" 
+                    width={48} 
+                    height={48} 
+                    className="w-12 h-12 mr-4 object-contain"
+                  />
+                  <span className="relative z-10 group-hover:text-eqtech-gold transition-colors duration-500 leading-none text-eqtech-light font-montserrat">
+                    EQTech <br /> 
+                    <span className="text-eqtech-gold font-roboto-flex">Investments</span>
+                  </span>
+                </h1>
+                {/* Efecto de brillo detrás del logo */}
+                <div className="absolute -inset-1 bg-gradient-to-r from-eqtech-gold/0 via-eqtech-gold/10 to-eqtech-gold/0 rounded-lg blur opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
               </div>
               <Button
                 variant="ghost"

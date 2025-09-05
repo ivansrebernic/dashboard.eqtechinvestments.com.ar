@@ -2,12 +2,20 @@ import { Button } from '@/components/ui/button'
 import { getUser } from '@/lib/auth/utils'
 import { logout } from '@/lib/auth/actions'
 import { NavMenu } from '@/components/navigation/nav-menu'
-import { PortfolioOverview } from '@/components/portfolio/portfolio-overview'
+import { PortfolioDetailView } from '@/components/portfolio/portfolio-detail-view'
 import { FirstLoginWrapper } from '@/components/auth/first-login-wrapper'
-import { LogOut } from 'lucide-react'
+import { ArrowLeft, LogOut } from 'lucide-react'
+import Link from 'next/link'
 
-export default async function HomePage() {
+interface PageProps {
+  params: Promise<{
+    id: string
+  }>
+}
+
+export default async function PortfolioDetailPage({ params }: PageProps) {
   await getUser()
+  const { id } = await params
 
   return (
     <FirstLoginWrapper>
@@ -20,7 +28,17 @@ export default async function HomePage() {
         
         <main className="flex-1 relative min-w-0 overflow-auto">
           {/* Premium Header Bar */}
-          <div className="flex justify-end p-6 border-b border-eqtech-gold/10 backdrop-blur-xl bg-eqtech-surface/20">
+          <div className="flex justify-between items-center p-6 border-b border-eqtech-gold/10 backdrop-blur-xl bg-eqtech-surface/20">
+            <Link
+              href="/"
+              className="flex items-center space-x-3 text-eqtech-gold-light hover:text-eqtech-gold transition-colors duration-300 group"
+            >
+              <div className="p-2 bg-eqtech-surface/60 rounded-xl border border-eqtech-gold/20 group-hover:bg-eqtech-gold/10 transition-colors">
+                <ArrowLeft className="w-5 h-5" />
+              </div>
+              <span className="font-medium">Back to Overview</span>
+            </Link>
+            
             <div className="flex items-center space-x-4">            
               {/* Logout button with premium styling */}
               <form action={logout}>
@@ -37,7 +55,7 @@ export default async function HomePage() {
             </div>
           </div>
           
-          <PortfolioOverview />
+          <PortfolioDetailView portfolioId={id} />
         </main>
       </div>
     </FirstLoginWrapper>

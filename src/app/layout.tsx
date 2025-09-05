@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Montserrat, DM_Serif_Text } from "next/font/google";
+import { Geist, Geist_Mono, Montserrat, DM_Serif_Text, Roboto_Flex } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
@@ -25,8 +25,11 @@ const dmSerif = DM_Serif_Text({
   weight: ['400'],
 });
 
-// Using system font fallback for Roboto Flex since it's not in next/font/google
-// Can be replaced with actual Roboto Flex once available
+const robotoFlex = Roboto_Flex({
+  variable: "--font-roboto-flex",
+  subsets: ["latin"],
+  weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
+});
 
 export const metadata: Metadata = {
   title: "EQTech Investments - Portfolio Management",
@@ -50,7 +53,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${montserrat.variable} ${dmSerif.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${montserrat.variable} ${dmSerif.variable} ${robotoFlex.variable} antialiased`}
       >
         {children}
         <Toaster />

@@ -4,11 +4,12 @@ import { useState, useEffect, useCallback } from 'react'
 import { AdminGuard } from '@/components/auth/route-guard'
 import { NavMenu } from '@/components/navigation/nav-menu'
 import { UserManagementTable } from '@/components/admin/user-management-table'
+import { CreateUserModal } from '@/components/admin/create-user-modal'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useAdminFunctions } from '@/lib/roles/hooks'
-import { Users, Search, RefreshCw } from 'lucide-react'
+import { Users, Search, RefreshCw, UserPlus } from 'lucide-react'
 import type { UserWithRole } from '@/types/auth'
 
 export default function UsersPage() {
@@ -16,6 +17,7 @@ export default function UsersPage() {
   const [filteredUsers, setFilteredUsers] = useState<UserWithRole[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [isLoading, setIsLoading] = useState(true)
+  const [showCreateUserModal, setShowCreateUserModal] = useState(false)
   const { getAllUsers, error } = useAdminFunctions()
 
   const loadUsers = useCallback(async () => {
@@ -75,10 +77,19 @@ export default function UsersPage() {
               
               <div className="flex gap-2">
                 <Button
+                  onClick={() => setShowCreateUserModal(true)}
+                  size="sm"
+                  className="bg-eqtech-gold text-eqtech-dark hover:bg-eqtech-gold/90 font-montserrat"
+                >
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Create User
+                </Button>
+                <Button
                   onClick={loadUsers}
                   size="sm"
                   disabled={isLoading}
-                  className="bg-eqtech-gray-dark border border-eqtech-gray-medium text-eqtech-light hover:bg-eqtech-gray-medium font-montserrat"
+                  variant="outline"
+                  className="border-eqtech-gray-medium text-eqtech-light hover:bg-eqtech-gray-medium font-montserrat"
                 >
                   <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
                   Refresh
@@ -177,6 +188,13 @@ export default function UsersPage() {
           </div>
         </main>
       </div>
+
+      {/* Create User Modal */}
+      <CreateUserModal
+        isOpen={showCreateUserModal}
+        onClose={() => setShowCreateUserModal(false)}
+        onUserCreated={loadUsers}
+      />
     </AdminGuard>
   )
 }
