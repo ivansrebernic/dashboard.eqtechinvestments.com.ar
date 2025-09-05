@@ -75,13 +75,14 @@ export function PortfolioDetailView({ portfolioId }: PortfolioDetailViewProps) {
     }
   }, [portfolioId])
 
-  // Fetch historical data for selected portfolio
-  const fetchHistoricalData = useCallback(async (portfolioData: Portfolio) => {
-    if (!portfolioData) return
+  // Fetch historical data for selected portfolio using pre-computed performance (OPTIMIZED)
+  const fetchHistoricalData = useCallback(async (portfolioData: Portfolio, performance: PortfolioPerformance) => {
+    if (!portfolioData || !performance) return
 
     try {
       setHistoricalDataLoading(true)
-      const historicalData = await publicPortfolioService.calculateHistoricalPerformance(portfolioData, 30)
+      // Use optimized overload that accepts pre-computed performance to avoid duplicate API calls
+      const historicalData = await publicPortfolioService.calculateHistoricalPerformance(portfolioData, performance, 30)
       
       setPortfolio(prev => prev ? {
         ...prev,
@@ -110,8 +111,8 @@ export function PortfolioDetailView({ portfolioId }: PortfolioDetailViewProps) {
 
   // Fetch historical data when portfolio is loaded
   useEffect(() => {
-    if (portfolio && !portfolio.historicalData && !portfolio.loading) {
-      fetchHistoricalData(portfolio)
+    if (portfolio && !portfolio.historicalData && !portfolio.loading && portfolio.performance) {
+      fetchHistoricalData(portfolio, portfolio.performance)
     }
   }, [portfolio, fetchHistoricalData])
 

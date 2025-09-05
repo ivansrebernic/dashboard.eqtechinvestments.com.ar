@@ -213,16 +213,44 @@ export class PublicPortfolioService {
    */
   async calculateHistoricalPerformance(
     portfolio: Portfolio,
-    days: number = 30
+    days?: number
+  ): Promise<HistoricalPortfolioData[]>
+  
+  /**
+   * Calculate historical portfolio performance with pre-computed performance (OPTIMIZED)
+   * Use this overload when you already have current performance data to avoid duplicate API calls
+   */
+  async calculateHistoricalPerformance(
+    portfolio: Portfolio,
+    currentPerformance: PortfolioPerformance,
+    days?: number
+  ): Promise<HistoricalPortfolioData[]>
+  
+  async calculateHistoricalPerformance(
+    portfolio: Portfolio,
+    daysOrPerformance: number | PortfolioPerformance = 30,
+    days?: number
   ): Promise<HistoricalPortfolioData[]> {
     try {
-      // Get current performance to ensure we have up-to-date holdings data
-      const currentPerformance = await this.calculatePerformance(portfolio)
+      let currentPerformance: PortfolioPerformance
+      let actualDays: number
+      
+      // Handle overloaded parameters
+      if (typeof daysOrPerformance === 'number') {
+        // First overload: calculateHistoricalPerformance(portfolio, days)
+        actualDays = daysOrPerformance
+        // Get current performance to ensure we have up-to-date holdings data
+        currentPerformance = await this.calculatePerformance(portfolio)
+      } else {
+        // Second overload: calculateHistoricalPerformance(portfolio, performance, days)
+        currentPerformance = daysOrPerformance
+        actualDays = days || 30
+      }
       
       return await historicalDataService.calculateHistoricalPortfolioPerformance(
         portfolio,
         currentPerformance.holdings,
-        days
+        actualDays
       )
     } catch (error) {
       console.error('Error calculating historical portfolio performance:', error)

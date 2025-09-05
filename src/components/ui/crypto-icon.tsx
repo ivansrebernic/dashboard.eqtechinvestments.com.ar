@@ -115,7 +115,7 @@ export function CryptoIcon({
         <div 
           className={cn(
             fallbackClasses, 
-            'absolute inset-0 animate-pulse'
+            ' inset-0 animate-pulse'
           )}
           style={{ backgroundColor: getFallbackColor() }}
         >
