@@ -3,6 +3,7 @@
 import { HoldingPerformance } from '@/types/portfolio'
 import { formatters } from '@/lib/coinmarketcap/services'
 import { TrendingUp, TrendingDown, Wallet } from 'lucide-react'
+import { CryptoIcon } from '@/components/ui/crypto-icon'
 
 interface HoldingsTableProps {
   holdings: HoldingPerformance[]
@@ -12,7 +13,6 @@ interface HoldingsTableProps {
   className?: string
 }
 
-const CHART_COLORS = ['#d4af37', '#e6c86b', '#f2d98f', '#c4941a', '#b8860b', '#e6c46b', '#f0d982', '#deb887']
 
 export function HoldingsTable({
   holdings,
@@ -26,7 +26,7 @@ export function HoldingsTable({
       <div className={`bg-gradient-to-br from-eqtech-surface/80 via-eqtech-surface-elevated/60 to-eqtech-surface/80 backdrop-blur-xl border border-eqtech-gray-medium/20 rounded-3xl p-8 ${className}`}>
         {showTitle && (
           <div className="mb-8 flex items-center space-x-3">
-            <div className="w-6 h-6 bg-eqtech-gold/20 rounded animate-pulse"></div>
+            <div className="w-6 h-6 bg-eqtech-gray-medium/30 rounded animate-pulse"></div>
             <div className="h-6 bg-eqtech-gray-medium/20 rounded w-48 animate-pulse"></div>
           </div>
         )}
@@ -91,10 +91,14 @@ export function HoldingsTable({
                 >
                   <td className="py-6 px-2">
                     <div className="flex items-center space-x-3">
-                      <div 
-                        className="w-4 h-4 rounded-full flex-shrink-0 shadow-sm" 
-                        style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }}
-                      ></div>
+                      <CryptoIcon
+                        cryptoId={holding.cryptoId}
+                        symbol={holding.symbol}
+                        name={holding.cryptoName}
+                        size={16}
+                        className="shadow-sm"
+                        showFallbackInitial={true}
+                      />
                       <div>
                         <span className="font-semibold text-eqtech-light text-lg">
                           {holding.symbol}

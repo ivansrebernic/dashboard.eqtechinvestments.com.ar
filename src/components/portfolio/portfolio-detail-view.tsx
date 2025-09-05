@@ -4,10 +4,10 @@ import { useEffect, useState, useCallback } from 'react'
 import { publicPortfolioService } from '@/lib/portfolio/public-api-service'
 import { Portfolio, PortfolioPerformance } from '@/types/portfolio'
 import { HistoricalPortfolioData } from '@/lib/portfolio/historical-data-service'
-import { formatters } from '@/lib/coinmarketcap/services'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { TrendingUp, TrendingDown, Wallet, DollarSign, Activity, BarChart3, Coins, Clock, Zap } from 'lucide-react'
 import { format, subDays } from 'date-fns'
+import { HoldingsTable } from './holdings-table'
 
 interface PortfolioDetailViewProps {
   portfolioId: string
@@ -438,74 +438,10 @@ export function PortfolioDetailView({ portfolioId }: PortfolioDetailViewProps) {
             <Wallet className="w-6 h-6 text-eqtech-gold" />
             <span>Portfolio Holdings</span>
           </h3>
-          {portfolio.performance.holdings.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-eqtech-gray-medium/30">
-                    <th className="text-left py-4 px-2 text-eqtech-gray-light font-medium text-sm uppercase tracking-wider">Asset</th>
-                    <th className="text-right py-4 px-2 text-eqtech-gray-light font-medium text-sm uppercase tracking-wider">Price</th>
-                    <th className="text-right py-4 px-2 text-eqtech-gray-light font-medium text-sm uppercase tracking-wider">24h Change</th>
-                    <th className="text-right py-4 px-2 text-eqtech-gray-light font-medium text-sm uppercase tracking-wider">Portfolio Weight %</th>
-                    <th className="text-right py-4 px-2 text-eqtech-gray-light font-medium text-sm uppercase tracking-wider">Visual Weight</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {portfolio.performance.holdings
-                    .sort((a, b) => b.portfolioWeight - a.portfolioWeight)
-                    .map((holding, index) => (
-                      <tr key={index} className="border-b border-eqtech-gray-medium/20 hover:bg-eqtech-surface-elevated/30 transition-colors group">
-                        <td className="py-6 px-2">
-                          <div className="flex items-center space-x-3">
-                            <div className={`w-4 h-4 rounded-full flex-shrink-0`} style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }}></div>
-                            <span className="font-semibold text-eqtech-light text-lg">{holding.symbol}</span>
-                          </div>
-                        </td>
-                        <td className="text-right py-6 px-2 text-eqtech-light font-medium">
-                          {formatters.currency(holding.currentPrice)}
-                        </td>
-                        <td className="text-right py-6 px-2">
-                          {holding.priceChangePercent24h !== 0 ? (
-                            <div className={`flex items-center justify-end space-x-1 font-medium ${
-                              holding.priceChangePercent24h >= 0 ? 'text-green-400' : 'text-red-400'
-                            }`}>
-                              {holding.priceChangePercent24h >= 0 ? (
-                                <TrendingUp className="w-4 h-4" />
-                              ) : (
-                                <TrendingDown className="w-4 h-4" />
-                              )}
-                              <span>{holding.priceChangePercent24h >= 0 ? '+' : ''}{holding.priceChangePercent24h.toFixed(2)}%</span>
-                            </div>
-                          ) : (
-                            <span className="text-eqtech-gray-light">-</span>
-                          )}
-                        </td>
-                        <td className="text-right py-6 px-2 text-eqtech-light font-bold text-lg">
-                          {holding.portfolioWeight.toFixed(1)}%
-                        </td>
-                        <td className="text-right py-6 px-2">
-                          <div className="flex items-center justify-end space-x-2">
-                            <div className="w-16 h-2 bg-eqtech-gray-dark rounded-full overflow-hidden">
-                              <div 
-                                className="h-full bg-gradient-to-r from-eqtech-gold to-eqtech-gold-light rounded-full transition-all duration-500"
-                                style={{ width: `${Math.min(100, holding.portfolioWeight)}%` }}
-                              ></div>
-                            </div>
-                            <span className="text-eqtech-gold font-medium min-w-[3rem]">
-                              {holding.portfolioWeight.toFixed(1)}%
-                            </span>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="text-center py-12 text-eqtech-gray-light">
-              No holdings available for this portfolio
-            </div>
-          )}
+          <HoldingsTable 
+            holdings={portfolio.performance.holdings} 
+            showTitle={false}
+          />
         </div>
       </div>
     </div>

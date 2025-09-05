@@ -53,6 +53,8 @@ export interface HoldingPerformance {
   marketCap?: number
   volume24h?: number
   portfolioWeight: number
+  cryptoId?: number
+  cryptoName?: string
 }
 
 export interface PortfolioMetrics {

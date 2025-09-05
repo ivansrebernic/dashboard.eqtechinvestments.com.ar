@@ -94,7 +94,9 @@ export class PublicPortfolioService {
             priceChangePercent24h: priceChange24h,
             marketCap: quote.market_cap,
             volume24h: quote.volume_24h,
-            portfolioWeight: 0 // Will be calculated after all holdings are processed
+            portfolioWeight: 0, // Will be calculated after all holdings are processed
+            cryptoId: crypto.id,
+            cryptoName: crypto.name
           } as HoldingPerformance
         } catch (error) {
           console.error(`Error calculating performance for ${holding.symbol}:`, error)
@@ -342,7 +344,9 @@ export class PublicPortfolioService {
           priceChangePercent24h: priceChange24h,
           marketCap: quote.market_cap,
           volume24h: quote.volume_24h,
-          portfolioWeight: 0 // Will be calculated after all holdings are processed
+          portfolioWeight: 0, // Will be calculated after all holdings are processed
+          cryptoId: crypto.id,
+          cryptoName: crypto.name
         } as HoldingPerformance
       } catch (error) {
         console.error(`Error calculating performance for ${holding.symbol}:`, error)
