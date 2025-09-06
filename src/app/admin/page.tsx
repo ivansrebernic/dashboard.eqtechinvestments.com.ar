@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { useUserRole } from '@/lib/roles/hooks'
 import { RoleBadge } from '@/components/roles/role-badge'
-import { Users, BarChart3, Briefcase, Shield } from 'lucide-react'
+import { Users, BarChart3, Briefcase, Shield, Camera } from 'lucide-react'
 import Link from 'next/link'
 
 export default function AdminPage() {
@@ -82,7 +82,7 @@ export default function AdminPage() {
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <Card className="bg-eqtech-gray-dark border-eqtech-gray-medium">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-eqtech-light font-montserrat">
@@ -123,6 +123,28 @@ export default function AdminPage() {
                   </Button>
                   <p className="text-sm text-eqtech-gray-light font-roboto-flex">
                     Track crypto holdings and monitor portfolio performance
+                  </p>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-eqtech-gray-dark border-eqtech-gray-medium">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-eqtech-light font-montserrat">
+                    <Camera className="h-5 w-5 text-eqtech-gold" />
+                    Snapshot Management
+                  </CardTitle>
+                  <CardDescription className="text-eqtech-gray-light font-roboto-flex">
+                    Configure portfolio performance snapshots and intervals
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Button asChild className="w-full bg-eqtech-gray-dark border border-eqtech-gray-medium text-eqtech-light hover:bg-eqtech-gray-medium font-montserrat">
+                    <Link href="/admin/snapshots">
+                      Manage Snapshots
+                    </Link>
+                  </Button>
+                  <p className="text-sm text-eqtech-gray-light font-roboto-flex">
+                    Create automated performance snapshots and configure intervals
                   </p>
                 </CardContent>
               </Card>

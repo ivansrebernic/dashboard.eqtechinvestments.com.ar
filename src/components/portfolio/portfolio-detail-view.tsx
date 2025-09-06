@@ -7,6 +7,7 @@ import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts'
 import { TrendingUp, TrendingDown, Wallet, DollarSign, BarChart3, Coins, Clock, Zap } from 'lucide-react'
 import { format } from 'date-fns'
 import { HoldingsTable } from './holdings-table'
+import { PerformanceChart } from './performance-chart'
 
 interface PortfolioDetailViewProps {
   portfolioId: string
@@ -287,6 +288,11 @@ export function PortfolioDetailView({ portfolioId }: PortfolioDetailViewProps) {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Performance History Section */}
+        <div className="mb-12">
+          <PerformanceChart portfolioId={portfolioId} />
         </div>
 
         {/* Charts and Analytics Section */}
