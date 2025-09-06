@@ -103,11 +103,6 @@ export function HoldingsTable({
                         <span className="font-semibold text-eqtech-light text-lg">
                           {holding.symbol}
                         </span>
-                        {holding.amount > 0 && (
-                          <div className="text-xs text-eqtech-gray-light mt-1">
-                            {holding.amount.toLocaleString()} units
-                          </div>
-                        )}
                       </div>
                     </div>
                   </td>
@@ -116,11 +111,6 @@ export function HoldingsTable({
                     <div className="text-eqtech-light font-medium text-lg">
                       {formatters.currency(holding.currentPrice)}
                     </div>
-                    {holding.totalValue > 0 && (
-                      <div className="text-xs text-eqtech-gray-light">
-                        {formatters.currency(holding.totalValue)} total
-                      </div>
-                    )}
                   </td>
                   
                   <td className="text-right py-6 px-2">
@@ -134,16 +124,8 @@ export function HoldingsTable({
                           <TrendingDown className="w-4 h-4" />
                         )}
                         <div>
-                          <div>
-                            {holding.priceChangePercent24h >= 0 ? '+' : ''}
-                            {holding.priceChangePercent24h.toFixed(2)}%
-                          </div>
-                          {holding.priceChange24h !== 0 && (
-                            <div className="text-xs opacity-75">
-                              {holding.priceChange24h >= 0 ? '+' : ''}
-                              {formatters.currency(holding.priceChange24h)}
-                            </div>
-                          )}
+                          {holding.priceChangePercent24h >= 0 ? '+' : ''}
+                          {holding.priceChangePercent24h.toFixed(2)}%
                         </div>
                       </div>
                     ) : (
